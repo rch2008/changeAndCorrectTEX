@@ -1,0 +1,3 @@
+#(TabMinipage\{)(\n);$1%$2
+#(FigMinipage\{)(\n);$1%$2
+#(png\})(\n);$1%$2

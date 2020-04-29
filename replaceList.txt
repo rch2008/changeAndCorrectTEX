@@ -1,0 +1,22 @@
+\\log;\log 
+\\lg;\lg
+\\ln;\ln 
+\\sin;\sin 
+\\cos;\cos 
+\\tan;\tan 
+{\bigtriangleup};\triangle 
+\bigtriangleup;\triangle 
+{\because};\because 
+{\therefore};\therefore 
+{\cdot};\cdot 
+{\in};\in 
+\overrightarrow;\vv
+#\{ {0,}\\uppi {0,}\};\uppi 
+{\div};\div 
+\bot;\perp
+{\bot};\perp 
+{\pm};\pm 
+{\angle};\angle 
+{\neq};\neq 
+{\Rightarrow};\Rightarrow 
+# {2,}; 
