@@ -142,7 +142,7 @@ Function Main()
         
         For Each texFileName In strFullName
             finalStr = ""
-            readTex texName(texFileName), doc
+            readUTF8 texName(texFileName), doc
             cutDocument doc        '去头尾，去双换行，删除带括号命令
             replaceSymbol doc, texFileName       '替换，删除一些符号
             correctUDscript doc    '双上下标
@@ -481,7 +481,7 @@ Function Redistribution()
         tempID(2) = tabID
         For Each texFileName In strFullName
             doc = ""
-            readTex CStr(texFileName), doc
+            readUTF8 CStr(texFileName), doc
             
             'doc = redistributeQuestionID(doc)
             'doc = redistributeF_T_ID(doc, "FigID")
@@ -1604,7 +1604,7 @@ End With
 Set adostream = Nothing
 End Function
 
-Function readTex(ByVal texFile As String, ByRef str As String)
+Function readUTF8(ByVal texFile As String, ByRef str As String)
 
 '2.VB读取utf-8文本文件
     
@@ -1857,19 +1857,21 @@ Public Function replaceSymbol(ByRef str As String, ByVal strName As String)
     replaceSymbolList
 
         For i = 0 To UBound(strReplaceSymbolList)
-            fr = Split(strReplaceSymbolList(i), ";")
-            If UBound(fr) = 1 Then
-                If Left(fr(0), 1) = "'" Then
+            If Trim(strReplaceSymbolList(i)) <> "" Then '非空行，用“;”进行分割
+                fr = Split(strReplaceSymbolList(i), ";")
+                If UBound(fr) = 1 Then
+                    If Left(fr(0), 1) = "'" Then
+                    Else
+                        re.Pattern = fr(0)
+                        str = re.Replace(str, fr(1))
+                        'str = Replace(str, fr(0), fr(1))
+                    End If
                 Else
-                    re.Pattern = fr(0)
-                    str = re.Replace(str, fr(1))
-                    'str = Replace(str, fr(0), fr(1))
-                End If
-            Else
-                If Left(fr(0), 1) = "'" Then
-                Else
-                    MsgBox "第" & i + 1 & "行  " & strReplaceSymbolList(i)
-                    Exit Function
+                    If Left(fr(0), 1) = "'" Then
+                    Else
+                        MsgBox "第" & i + 1 & "行  " & strReplaceSymbolList(i)
+                        Exit Function
+                    End If
                 End If
             End If
         Next
@@ -1881,17 +1883,9 @@ Private Function replaceSymbolList() As Boolean
     Dim replaceSymbolListFile As String
     replaceSymbolListFile = App.Path & "\replaceSymbolList.txt"
     On Error GoTo err1
-    Open replaceSymbolListFile For Input As #1
-    i = 0
-    Do While Not EOF(1) ' 循环至文件尾。
-        i = i + 1
-        Line Input #1, TextLine ' 读入一行数据并将其赋予某变量。
-        If Trim(TextLine) <> "" Then
-            strTemp = strTemp + Chr(0) + TextLine
-        End If
-    Loop
-    Close #1
-    strReplaceSymbolList = Split(Right(strTemp, Len(strTemp) - 1), Chr(0))
+    readUTF8 replaceSymbolListFile, strTemp
+    strTemp = Replace(strTemp, Chr(10), "")
+    strReplaceSymbolList = Split(Right(strTemp, Len(strTemp) - 1), Chr(13))
     replaceSymbolList = True
     Exit Function
 err1:
@@ -1940,7 +1934,7 @@ Public Function replaceMacros()
     
     Dim docxFileName
     For Each docxFileName In strFullName
-        readTex docxFileName, str
+        readUTF8 docxFileName, str
         For i = 0 To UBound(strReplaceList)
             fr = Split(strReplaceList(i), ";")
             If UBound(fr) = 1 Then

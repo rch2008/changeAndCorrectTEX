@@ -1,4 +1,5 @@
 VERSION 5.00
+Object = "{0DF5D14C-08DD-4806-8BE2-B59CB924CFC9}#1.7#0"; "VBCCR16.OCX"
 Begin VB.Form form_tex 
    BorderStyle     =   1  'Fixed Single
    Caption         =   "docx转tex及修正"
@@ -13,6 +14,27 @@ Begin VB.Form form_tex
    ScaleHeight     =   7905
    ScaleWidth      =   9585
    StartUpPosition =   3  '窗口缺省
+   Begin VBCCR16.RichTextBox RichTextBox1 
+      Height          =   5655
+      Left            =   4680
+      TabIndex        =   40
+      Top             =   1800
+      Width           =   4815
+      _ExtentX        =   8493
+      _ExtentY        =   9975
+      BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
+         Name            =   "宋体"
+         Size            =   10.5
+         Charset         =   134
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      MultiLine       =   -1  'True
+      ScrollBars      =   2
+      TextRTF         =   "Form1.frx":0000
+   End
    Begin VB.CommandButton Command13 
       Caption         =   "重置ID"
       Height          =   495
@@ -89,11 +111,12 @@ Begin VB.Form form_tex
          Strikethrough   =   0   'False
       EndProperty
       Height          =   5655
-      Left            =   4680
+      Left            =   6840
       MultiLine       =   -1  'True
       ScrollBars      =   2  'Vertical
       TabIndex        =   29
-      Top             =   1800
+      Top             =   2280
+      Visible         =   0   'False
       Width           =   4815
    End
    Begin VB.CommandButton Command7 
@@ -126,7 +149,7 @@ Begin VB.Form form_tex
       Left            =   240
       MultiLine       =   -1  'True
       TabIndex        =   18
-      Text            =   "Form1.frx":0000
+      Text            =   "Form1.frx":0166
       Top             =   4080
       Width           =   3615
    End
@@ -532,16 +555,16 @@ End Sub
 
 Private Sub Command10_Click()
     Dim str As String
-    str = Text8.Text
+    str = RichTextBox1.Text
     replaceSymbol str, ""
     insertDollerT str
     str = delLeftRight(str)
     correctLeftRight str
-    Text8.Text = str
+    RichTextBox1.Text = str
 End Sub
 
 Private Sub Command11_Click()
-    Text8.Text = ""
+    RichTextBox1.Text = ""
 End Sub
 
 Private Sub Command12_Click()
@@ -699,7 +722,7 @@ End Sub
 
 Private Sub Command9_Click()
 Clipboard.Clear
-Clipboard.SetText (Text8.Text)
+Clipboard.SetText (RichTextBox1.Text)
 End Sub
 
 Private Sub Form_DblClick()

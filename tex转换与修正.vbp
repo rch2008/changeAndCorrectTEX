@@ -1,9 +1,8 @@
 Type=Exe
-Reference=*\G{00020430-0000-0000-C000-000000000046}#2.0#0#C:\Windows\system32\stdole2.tlb#OLE Automation
 Reference=*\G{00000206-0000-0010-8000-00AA006D2EA4}#2.6#0#C:\Program Files\Common Files\System\ado\msado26.tlb#Microsoft ActiveX Data Objects 2.6 Library
-Reference=*\G{00020905-0000-0000-C000-000000000046}#8.4#0#MSWORD.OLB#Microsoft Word 12.0 Object Library
 Reference=*\G{3F4DACA7-160D-11D2-A8E9-00104B365C9F}#5.5#0#C:\Windows\system32\vbscript.dll\3#Microsoft VBScript Regular Expressions 5.5
-Object={F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0; COMDLG32.OCX
+Reference=*\G{00020905-0000-0000-C000-000000000046}#8.5#0#C:\Program Files\Microsoft Office\Office14\MSWORD.OLB#Microsoft Word 14.0 Object Library
+Object={0DF5D14C-08DD-4806-8BE2-B59CB924CFC9}#1.7#0; VBCCR16.OCX
 Form=Form1.frm
 Module=RegExpression; RegExpression.bas
 Module=INI; INI.bas
