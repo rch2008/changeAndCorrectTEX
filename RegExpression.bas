@@ -12,6 +12,7 @@ Public strReplaceList() As String
 Public strReplaceSymbolList() As String
 Public strTestName As String
 Public replaceListFile As String
+Public replaceSymbolListFile As String
 Public braceCMDList As String
 Public docxToTexPath As String
 Public addDollorFlag As Boolean
@@ -1880,8 +1881,8 @@ End Function
 Private Function replaceSymbolList() As Boolean
     Dim TextLine As String
     Dim strTemp As String
-    Dim replaceSymbolListFile As String
-    replaceSymbolListFile = App.Path & "\replaceSymbolList.txt"
+    'Dim replaceSymbolListFile As String
+    'replaceSymbolListFile = App.Path & "\replaceSymbolList.txt"
     On Error GoTo err1
     readUTF8 replaceSymbolListFile, strTemp
     strTemp = Replace(strTemp, Chr(10), "")
@@ -1901,17 +1902,9 @@ Public Function replaceList() As Boolean
     Dim TextLine As String
     Dim strTemp As String
     On Error GoTo err1
-    Open replaceListFile For Input As #1
-    i = 0
-    Do While Not EOF(1) ' 循环至文件尾。
-        i = i + 1
-        Line Input #1, TextLine ' 读入一行数据并将其赋予某变量。
-        If Trim(TextLine) <> "" Then
-            strTemp = strTemp + "?" + TextLine
-        End If
-    Loop
-    Close #1
-    strReplaceList = Split(Right(strTemp, Len(strTemp) - 1), "?")
+    readUTF8 replaceListFile, strTemp
+    strTemp = Replace(strTemp, Chr(10), "")
+    strReplaceList = Split(Right(strTemp, Len(strTemp) - 1), Chr(13))
     replaceList = True
     Exit Function
 err1:

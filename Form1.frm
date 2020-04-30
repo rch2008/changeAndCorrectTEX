@@ -3,7 +3,7 @@ Object = "{0DF5D14C-08DD-4806-8BE2-B59CB924CFC9}#1.7#0"; "VBCCR16.OCX"
 Begin VB.Form form_tex 
    BorderStyle     =   1  'Fixed Single
    Caption         =   "docx转tex及修正"
-   ClientHeight    =   7905
+   ClientHeight    =   8115
    ClientLeft      =   45
    ClientTop       =   375
    ClientWidth     =   9585
@@ -11,17 +11,42 @@ Begin VB.Form form_tex
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   7905
+   ScaleHeight     =   8115
    ScaleWidth      =   9585
    StartUpPosition =   3  '窗口缺省
+   Begin VB.Frame Frame8 
+      Caption         =   "首次修正字符列表"
+      Height          =   855
+      Left            =   4680
+      TabIndex        =   41
+      Top             =   1200
+      Width           =   4815
+      Begin VB.TextBox Text10 
+         Height          =   495
+         Left            =   240
+         MultiLine       =   -1  'True
+         TabIndex        =   43
+         Text            =   "Form1.frx":0000
+         Top             =   240
+         Width           =   3735
+      End
+      Begin VB.CommandButton Command14 
+         Caption         =   "选择"
+         Height          =   495
+         Left            =   4080
+         TabIndex        =   42
+         Top             =   240
+         Width           =   615
+      End
+   End
    Begin VBCCR16.RichTextBox RichTextBox1 
-      Height          =   5655
+      Height          =   5295
       Left            =   4680
       TabIndex        =   40
-      Top             =   1800
+      Top             =   2640
       Width           =   4815
       _ExtentX        =   8493
-      _ExtentY        =   9975
+      _ExtentY        =   9340
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
          Name            =   "宋体"
          Size            =   10.5
@@ -33,14 +58,14 @@ Begin VB.Form form_tex
       EndProperty
       MultiLine       =   -1  'True
       ScrollBars      =   2
-      TextRTF         =   "Form1.frx":0000
+      TextRTF         =   "Form1.frx":0007
    End
    Begin VB.CommandButton Command13 
       Caption         =   "重置ID"
       Height          =   495
       Left            =   3600
       TabIndex        =   38
-      Top             =   5160
+      Top             =   5280
       Width           =   735
    End
    Begin VB.Frame Frame6 
@@ -62,8 +87,9 @@ Begin VB.Form form_tex
          Enabled         =   0   'False
          Height          =   495
          Left            =   240
+         MultiLine       =   -1  'True
          TabIndex        =   35
-         Text            =   "Text9"
+         Text            =   "Form1.frx":016D
          Top             =   240
          Width           =   3735
       End
@@ -73,7 +99,7 @@ Begin VB.Form form_tex
       Height          =   495
       Left            =   7920
       TabIndex        =   33
-      Top             =   1200
+      Top             =   2040
       Width           =   975
    End
    Begin VB.CheckBox Check2 
@@ -89,7 +115,7 @@ Begin VB.Form form_tex
       Height          =   495
       Left            =   4920
       TabIndex        =   31
-      Top             =   1200
+      Top             =   2040
       Width           =   1335
    End
    Begin VB.CommandButton Command9 
@@ -97,7 +123,7 @@ Begin VB.Form form_tex
       Height          =   495
       Left            =   6480
       TabIndex        =   30
-      Top             =   1200
+      Top             =   2040
       Width           =   1095
    End
    Begin VB.TextBox Text8 
@@ -115,7 +141,7 @@ Begin VB.Form form_tex
       MultiLine       =   -1  'True
       ScrollBars      =   2  'Vertical
       TabIndex        =   29
-      Top             =   2280
+      Top             =   3120
       Visible         =   0   'False
       Width           =   4815
    End
@@ -132,7 +158,7 @@ Begin VB.Form form_tex
       Height          =   495
       Left            =   240
       TabIndex        =   19
-      Top             =   5160
+      Top             =   5280
       Width           =   1215
    End
    Begin VB.TextBox Text5 
@@ -149,7 +175,7 @@ Begin VB.Form form_tex
       Left            =   240
       MultiLine       =   -1  'True
       TabIndex        =   18
-      Text            =   "Form1.frx":0166
+      Text            =   "Form1.frx":0173
       Top             =   4080
       Width           =   3615
    End
@@ -399,11 +425,11 @@ Begin VB.Form form_tex
       End
    End
    Begin VB.Frame Frame4 
-      Caption         =   "tex文件替换"
+      Caption         =   "tex文件自定义替换"
       Height          =   2895
       Left            =   120
       TabIndex        =   20
-      Top             =   4920
+      Top             =   5040
       Width           =   4335
       Begin VB.CommandButton Command8 
          Caption         =   "修正ID"
@@ -558,8 +584,11 @@ Private Sub Command10_Click()
     str = RichTextBox1.Text
     replaceSymbol str, ""
     insertDollerT str
-    str = delLeftRight(str)
-    correctLeftRight str
+    If correctLeftRightFlag = True Then
+        str = delLeftRight(str)
+        correctLeftRight str
+    End If
+
     RichTextBox1.Text = str
 End Sub
 
@@ -579,6 +608,14 @@ End Sub
 
 Private Sub Command13_Click()
     redistributeAll
+End Sub
+
+Private Sub Command14_Click()
+    strFullName = selectFile(3)
+    If strFullName(0) <> "" Then
+        replaceSymbolListFile = strFullName(0)
+        Text10.Text = replaceSymbolListFile
+    End If
 End Sub
 
 Private Sub Command2_Click()
@@ -778,6 +815,7 @@ Private Sub Form_Initialize()
     correctLeftRightFlag = False
     Text5.Text = bookPath
     Text9.Text = docxToTexPath
+    Text10.Text = replaceSymbolListFile
     Text7.Text = replaceListFile
     'Text7.Enabled = False
 End Sub
@@ -798,7 +836,14 @@ Function readAppIni()
         docxToTexPath = "D:\docx2tex\"
     End If
     
-    str = GetAppINI("fullFileName", "replaceListFile")
+    str = GetAppINI("fullFileName", "replaceSymbolListFile")    '初次替换列表
+    If str <> "" Then
+        replaceSymbolListFile = str
+    Else
+        replaceSymbolListFile = App.Path & "\replaceSymbolList.txt"
+    End If
+    
+    str = GetAppINI("fullFileName", "replaceListFile")          '二次修正列表
     If str <> "" Then
         replaceListFile = str
     Else
@@ -883,7 +928,13 @@ Private Sub Form_Terminate()
     'MsgBox "quite"
     WriteAppINI "fullFileName", "bookPath", bookPath
     WriteAppINI "fullFileName", "docxToTexPath", docxToTexPath
+    WriteAppINI "fullFileName", "replaceSymbolListFile", replaceSymbolListFile
     WriteAppINI "fullFileName", "replaceListFile", replaceListFile
+End Sub
+
+Private Sub Text10_DblClick()
+    Text10.SelStart = Text10.MaxLength
+    Shell "notepad " + replaceSymbolListFile, vbNormalFocus
 End Sub
 
 Private Sub Text2_Change()

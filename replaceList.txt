@@ -1,4 +1,4 @@
-\\log;\log 
+﻿\\log;\log 
 \\lg;\lg
 \\ln;\ln 
 \\sin;\sin 
