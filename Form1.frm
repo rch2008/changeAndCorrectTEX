@@ -3,16 +3,16 @@ Object = "{0DF5D14C-08DD-4806-8BE2-B59CB924CFC9}#1.7#0"; "VBCCR16.OCX"
 Begin VB.Form form_tex 
    BorderStyle     =   1  'Fixed Single
    Caption         =   "docx转tex及修正"
-   ClientHeight    =   8115
+   ClientHeight    =   8025
    ClientLeft      =   45
    ClientTop       =   375
-   ClientWidth     =   9585
+   ClientWidth     =   9555
    FillStyle       =   0  'Solid
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   8115
-   ScaleWidth      =   9585
+   ScaleHeight     =   8025
+   ScaleWidth      =   9555
    StartUpPosition =   3  '窗口缺省
    Begin VB.Frame Frame8 
       Caption         =   "首次修正字符列表"
@@ -25,6 +25,7 @@ Begin VB.Form form_tex
          Height          =   495
          Left            =   240
          MultiLine       =   -1  'True
+         ScrollBars      =   2  'Vertical
          TabIndex        =   43
          Text            =   "Form1.frx":0000
          Top             =   240
@@ -647,7 +648,7 @@ Private Sub Command4_Click()
         texFlagLabel.Caption = "遍历文件夹未设置！"
         Exit Sub
     End If
-    If replaceList = False Then
+    If readReplaceList = False Then
         texFlagLabel.Caption = "退出"
         Exit Sub
     End If
@@ -711,7 +712,7 @@ End Function
 
 Private Sub Command5_Click()
     texFlagLabel.Caption = "处理中……"
-    If replaceList = False Then Exit Sub
+    If readReplaceList = False Then Exit Sub
     strFullName = selectFile(1)
     If strFullName(0) <> "" Then
         replaceMacros
@@ -766,11 +767,9 @@ Private Sub Form_DblClick()
     texFlagLabel.Caption = "开始！"
     'onlyToTex
     'beforeChange
-    test
-    'MsgBox Left("test", 1)
+    'correcttest
     'MsgBox "questionID:" & questionID & " FigID:" & figID & " TabID:" & tabID
-    'redistributeAll
-    
+    te
     texFlagLabel.Caption = "完成！"
 End Sub
 
@@ -794,14 +793,25 @@ End Function
 Sub test()
     Dim re As Object
     Dim str As String
+    Dim s As String
+    Dim prev As Long
     Dim mMatches As Object      '匹配字符串集合对象
+    Dim mMatch As Object        '匹配字符串
     Set re = New RegExp
     re.Global = True
-    re.Pattern = "(\\left(\.|\(|\[|\\\{|\||\\\||\\[a-zA-Z]+|/|\)|\]|\\\}))|(\\right(\.|\)|\]|\\\}|\||\\\||\\[a-zA-Z]+|\(|\[|\\\{|/))"
-    str = "2．在$\Updelta ABC$中，$\left\langle\dfrac ab\right[  $\left[\frac{2}{1}\right]$  $\left\{\frac{3}{2}\right\}$ 已知向量$\overset{\rightharpoonup }{AB}$与$\overset{\rightharpoonup }{AC}$满足$(\frac{\overset{\rightharpoonup }{AB}}{\left| \overset{\rightharpoonup }{AB}\right| }+\frac{\overset{\rightharpoonup }{AC}}{\left| \overset{\rightharpoonup }{AC}\right| })\bot \overset{\rightharpoonup }{BC}$且$\frac{\overset{\rightharpoonup }{AB}}{\left| \overset{\rightharpoonup }{AB}\right| }\cdot \frac{\overset{\rightharpoonup }{AC}}{\left| \overset{\rightharpoonup }{AC}\right| }=\frac{1}{2}$，则$\Updelta ABC$是(    )"
-    Set mMatches = re.Execute(str)
-    'str = re.Replace(str, "OMG")
-    
+    re.Pattern = "\\item[XTJFM]\{"
+    prev = 1
+    s = "dfs\itemX{1}{在等腰$\bigtriangleup ABC$，$AB=AC$，$BC=6$，向量$\vec{AD}=\vec{DC}$，则$\vec{DC}\cdot \vec{BC}$的值为\xz }{$9$}{$18$}{$27$}{$36$}{$A$}"
+    Set mMatches = re.Execute(s)
+    For Each mMatch In mMatches
+        If prev < mMatch.FirstIndex Then
+            str = str + Mid(s, prev, mMatch.FirstIndex + 1 + mMatch.Length - prev)
+            prev = nextRightBrace(mMatch.FirstIndex + mMatch.Length + 1, s)
+            prev = prev + 1
+            nextLBrace prev, s
+            prev = nextRightBrace(prev + 1, s)
+        End If
+    Next
     MsgBox str
 End Sub
 Private Sub Form_Initialize()
@@ -986,3 +996,86 @@ Private Sub Text7_DblClick()
     Shell "notepad " + replaceListFile, vbNormalFocus
 
 End Sub
+'''''''''''''隐藏属性'''''''''''''''''
+Function correcttest()
+    Dim str As String
+    Dim fr() As String
+    Dim re As Object
+    Dim mMatches As Object
+    Dim docxFileName
+    
+    texFlagLabel.Caption = "处理中……"
+    strFullName = selectFile(1)
+    If strFullName(0) <> "" Then
+'''''''''''''''''''''''''''''''''''''''''''
+    
+    Set re = New RegExp
+    re.Global = True
+    
+    For Each docxFileName In strFullName
+        readUTF8 docxFileName, str
+        correctQlist str
+        writeTex str, CStr(docxFileName)
+    Next
+''''''''''''''''''''''''''''''''''''''
+    End If
+    texFlagLabel.Caption = "完成！"
+End Function
+Function bl()
+    Dim str As String
+    Dim fr() As String
+    Dim re As Object
+    Dim mMatches As Object
+    Dim docxFileName
+    
+    texFlagLabel.Caption = "处理中……"
+
+    If findTexFile = False Then
+        texFlagLabel.Caption = "遍历文件夹未设置！"
+        Exit Function
+    End If
+    If strFullName(0) <> "" Then
+'''''''''''''''''''''''''''''''''''''''''''
+        Set re = New RegExp
+        re.Global = True
+        
+        For Each docxFileName In strFullName
+            readUTF8 docxFileName, str
+            correctQlist str
+            writeTex str, CStr(docxFileName)
+        Next
+''''''''''''''''''''''''''''''''''''''
+        MsgBox "共 " & UBound(strFullName) & " 个文件"
+    Else
+        MsgBox "none"
+    End If
+    texFlagLabel.Caption = "完成"
+End Function
+Function correctQlist(ByRef s As String) As String
+    Dim re As Object
+    Dim mMatches As Object      '匹配字符串集合对象
+    Dim mMatch As Object        '匹配字符串
+    Dim str As String
+    Dim strTemp As String
+    Dim prev As Long
+    
+    prev = 1
+    Set re = New RegExp
+    re.Pattern = "\\item[XTJFM]\{"
+    
+    re.Global = True
+    Set mMatches = re.Execute(s)
+    For Each mMatch In mMatches
+        If prev < mMatch.FirstIndex Then
+            str = str + Mid(s, prev, mMatch.FirstIndex + 1 + mMatch.Length - prev)
+            prev = nextRightBrace(mMatch.FirstIndex + mMatch.Length + 1, s)
+            prev = nextRightBrace(prev + 2, s)
+            strTemp = Mid(s, mMatch.FirstIndex + mMatch.Length + 1, prev - mMatch.FirstIndex - mMatch.Length - 1)
+            strTemp = Replace(strTemp, "myitemize", "questionList")
+            str = str + strTemp
+            'prev = prev + 1
+        End If
+        DoEvents
+    Next
+    s = str + Mid(s, prev)
+End Function

@@ -23,7 +23,7 @@ Public fileSelect As Boolean
 Public needLeftRightList As String
 Public Unidentified As Long
 Public strUnidentified As String
-
+Private firstQuestionFlag As Boolean
 Function init()
     Unidentified = 0
     fileSelect = False
@@ -254,186 +254,6 @@ Function cutDocument(ByRef str As String) As String
         MsgBox "document环境不匹配！"
     End If
     str = s
-End Function
-
-Function replaceSymbolA(ByRef str As String, ByVal strName As String)
-    
-    Dim re As Object
-    
-    Set re = New RegExp
-    re.Global = True
-    
-    re.Pattern = "单选题"
-    str = re.Replace(str, "选择题")
-    re.Pattern = "【解答】|【答案】"
-    str = re.Replace(str, "【解析】")
-    '删除\privateuse
-    re.Pattern = "\\privateuse(\{\})?"
-    str = re.Replace(str, "")
-    '删除\newline
-    re.Pattern = "\\newline"
-    str = re.Replace(str, "")
-    '替换]}
-    're.Pattern = "\]\}"
-    'str = re.Replace(str, "]")
-    '替换{[
-    're.Pattern = "\{\["
-    'str = re.Replace(str, "[")
-    '替换中文空格
-    re.Pattern = "　"
-    str = re.Replace(str, " ")
-    '替换中文括号
-    re.Pattern = "（"
-    str = re.Replace(str, "(")
-    re.Pattern = "）"
-    str = re.Replace(str, ")")
-    '替换小于号
-    re.Pattern = "＜"
-    str = re.Replace(str, "<")
-    '替换大于号
-    re.Pattern = "＞"
-    str = re.Replace(str, ">")
-    '替换小于号
-    re.Pattern = "\{\\textless\}"
-    str = re.Replace(str, "<")
-    '替换大于号
-    re.Pattern = "\{\\textgreater\}"
-    str = re.Replace(str, ">")
-    '替换加号
-    re.Pattern = "＋"
-    str = re.Replace(str, "+")
-    '替换减号
-    re.Pattern = "－"
-    str = re.Replace(str, "-")
-    '替换减号
-    re.Pattern = "﹣"
-    str = re.Replace(str, "-")
-    '替换等号
-    re.Pattern = "＝"
-    str = re.Replace(str, "=")
-    '替换非
-    re.Pattern = "￢"
-    str = re.Replace(str, "\neg ")
-    '替换平行且等于
-    re.Pattern = "\\underset\{=\}\{\\parallel +\}"
-    str = re.Replace(str, "\pxqdy ")
-    '替换平行
-    re.Pattern = "\\parallel"
-    str = re.Replace(str, "\px")
-    '线不在面上
-    re.Pattern = "\\nsubset"
-    str = re.Replace(str, "\not\subset")
-    '替换反斜线
-    re.Pattern = "\\textbackslash +\\textbackslash +"
-    str = re.Replace(str, "\\")
-    re.Pattern = "\\backslash +\\backslash +"
-    str = re.Replace(str, "\\")
-    '≥
-    re.Pattern = "\\geq(?!slant)"
-    str = re.Replace(str, "\geqslant")
-    '≤
-    re.Pattern = "\\leq(?!slant)"
-    str = re.Replace(str, "\leqslant")
-    
-    re.Pattern = "(\\_)+"
-    str = re.Replace(str, "\tk ")
-    '\sum\limits
-    re.Pattern = "\\sum(?= |_|\\)"
-    str = re.Replace(str, "\sum\limits")
-    '三角函数
-    re.Pattern = "(?!\\)sin {0,}"
-    str = re.Replace(str, "\sin ")
-    re.Pattern = "(?!\\)cos {0,}"
-    str = re.Replace(str, "\cos ")
-    re.Pattern = "(?!\\)tan(?= {0,}|\^|\\)"
-    str = re.Replace(str, "\tan ")
-    re.Pattern = "(?!\\)log {0,}"
-    str = re.Replace(str, "\log ")
-    re.Pattern = "(?!\\)ln {0,}"
-    str = re.Replace(str, "\ln ")
-    re.Pattern = "(?!\\)lg {0,}"
-    str = re.Replace(str, "\lg ")
-    '带圈数字
-    re.Pattern = "\\ding\{172\}"
-    str = re.Replace(str, "①")
-    re.Pattern = "\\ding\{173\}"
-    str = re.Replace(str, "②")
-    re.Pattern = "\\ding\{174\}"
-    str = re.Replace(str, "③")
-    re.Pattern = "\\ding\{175\}"
-    str = re.Replace(str, "④")
-    re.Pattern = "\\ding\{176\}"
-    str = re.Replace(str, "⑤")
-    '替换问题编号
-    re.Pattern = "\(Ⅰ\)"
-    str = re.Replace(str, "(1)")
-    re.Pattern = "\(Ⅱ\)"
-    str = re.Replace(str, "(2)")
-    re.Pattern = "\(Ⅲ\)"
-    str = re.Replace(str, "(3)")
-    re.Pattern = "\(III\)"
-    str = re.Replace(str, "(3)")
-    re.Pattern = "\(II\)"
-    str = re.Replace(str, "(2)")
-    re.Pattern = "\(I\)"
-    str = re.Replace(str, "(1)")
-    '摄氏度℃
-    're.Pattern = "℃"
-    'str = re.Replace(str, "\wendu ")
-    '竖线替换
-    re.Pattern = "\{\\textbar\}"
-    str = re.Replace(str, "|")
-    '向量替换
-    re.Pattern = "\\overset\{\\rightarrow +\}"
-    str = re.Replace(str, "\vv")
-    '分式替换
-    re.Pattern = "\\frac\{"
-    str = re.Replace(str, "\dfrac{")
-    '替换乘法 点
-    re.Pattern = "\\textbullet"
-    str = re.Replace(str, "\cdot")
-    
-    '表格环境替换
-    re.Pattern = "p\{([a-zA-Z0-9\.+-\\ ])+\}\|"
-    str = re.Replace(str, "c|")
-    
-    re.Pattern = "\\begin\{tabularx\}\{\\textwidth\}"
-    str = re.Replace(str, "\begin{tabular}")
-    re.Pattern = "\\end\{tabularx\}"
-    str = re.Replace(str, "\end{tabular}")
-    
-    re.Pattern = "\\begin\{table\}"
-    str = re.Replace(str, "")
-    re.Pattern = "\\end\{table\}"
-    str = re.Replace(str, "")
-    
-    'equation环境
-    re.Pattern = "\\begin\{equation\*?\}"
-    str = re.Replace(str, "")
-    re.Pattern = "\\end\{equation\*?\}"
-    str = re.Replace(str, "")
-    'MsgBox strName
-    re.Pattern = "(\{\\ldots\}){2,}"
-    str = re.Replace(str, "\dotfill")
-    '删除美元符号
-    re.Pattern = "\$"
-    str = re.Replace(str, "")
-    '删除选择题（  ）
-    re.Pattern = "\( +\)"
-    str = re.Replace(str, "")
-    '删除图片宽度设定
-    re.Pattern = "(\[width=1\\textwidth\])|(\[width=0\.[0-9]+\\textwidth\])"
-    str = re.Replace(str, "[width=\lFigWidth]")
-    re.Pattern = "\.docx\.tmp/word/media"
-    str = re.Replace(str, "")
-    
-    'Dim arr() As String
-    'arr = Split(strName, "\")
-    'arr = Split(arr(UBound(arr)), ".")
-    'strName = arr(0)
-    
-    're.Pattern = strName + "/image"
-    'str = re.Replace(str, "\frontPath/" + strName + "/image") '
 End Function
 
 Function delBraceCMD(ByRef s As String) As String
@@ -698,35 +518,36 @@ Function cutXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileName
     strJD = ""
     
     re.Global = True
-    re.Pattern = "(\n|\r|" + Chr(13) + ")" + "\S{0,2}(选择|填空|解答)题"
+    re.Pattern = "(\n|\r|" + Chr(13) + ")" + "\S{0,2}(选择|填空|解答|多选|单选)题"
 
     If re.test(doc) Then
+        firstQuestionFlag = True
         Set mMatches = re.Execute(doc)
         strTestName = Mid(doc, 1, mMatches(0).FirstIndex)
         For i = 0 To mMatches.Count - 1
             strTemp = mMatches(i).Value
-            If InStr(strTemp, "选择") > 0 Then
+            If InStr(strTemp, "选择") > 0 Or InStr(strTemp, "多选") > 0 Or InStr(strTemp, "单选") > 0 Then
                 If i + 1 < mMatches.Count Then
-                    strXZ = Mid(doc, mMatches(i).FirstIndex + mMatches(i).Length + 1, mMatches(i + 1).FirstIndex - mMatches(i).FirstIndex - mMatches(i).Length)
+                    strXZ = Mid(doc, mMatches(i).FirstIndex + 1, mMatches(i + 1).FirstIndex - mMatches(i).FirstIndex)
                 Else
-                    strXZ = Mid(doc, mMatches(i).FirstIndex + mMatches(i).Length + 1)
+                    strXZ = Mid(doc, mMatches(i).FirstIndex + 1)
                 End If
-                changeToCmdXZ cutApart(strXZ), finalStr
+                changeToCmdXZ cutApart(strXZ, CStr(strTemp)), finalStr
             ElseIf InStr(strTemp, "填空") > 0 Then
                 If i + 1 < mMatches.Count Then
-                    strTK = Mid(doc, mMatches(i).FirstIndex + mMatches(i).Length + 1, mMatches(i + 1).FirstIndex - mMatches(i).FirstIndex - mMatches(i).Length)
+                    strTK = Mid(doc, mMatches(i).FirstIndex + 1, mMatches(i + 1).FirstIndex - mMatches(i).FirstIndex)
                 Else
-                    strTK = Mid(doc, mMatches(i).FirstIndex + mMatches(i).Length + 1)
+                    strTK = Mid(doc, mMatches(i).FirstIndex + 1)
                 End If
                 'correctTK strTK
-                changeToCmdTK cutApart(strTK), finalStr
+                changeToCmdTK cutApart(strTK, CStr(strTemp)), finalStr
             ElseIf InStr(strTemp, "解答") > 0 Then
                 If i + 1 < mMatches.Count Then
-                    strJD = Mid(doc, mMatches(i).FirstIndex + mMatches(i).Length + 1, mMatches(i + 1).FirstIndex - mMatches(i).FirstIndex - mMatches(i).Length)
+                    strJD = Mid(doc, mMatches(i).FirstIndex + 1, mMatches(i + 1).FirstIndex - mMatches(i).FirstIndex)
                 Else
-                    strJD = Mid(doc, mMatches(i).FirstIndex + mMatches(i).Length + 1)
+                    strJD = Mid(doc, mMatches(i).FirstIndex + 1)
                 End If
-                changeToCmdJD cutApart(strJD), finalStr
+                changeToCmdJD cutApart(strJD, CStr(strTemp)), finalStr
             End If
             DoEvents
         Next i
@@ -751,22 +572,23 @@ Function cutXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileName
     End If
     re.Pattern = "(\n|\r|" + Chr(13) + ")"
     strTestName = re.Replace(strTestName, "")
-    finalStr = "\section{" + strTestName + "}" + Chr(13) + "\begin{myitemize}" + finalStr + Chr(13) + "\end{myitemize}"
-    'Documents.Add Template:="Normal", NewTemplate:=False, DocumentType:=0 "\setFrontPath{Gao-Kao-Juan}" + Chr(13) +
-    'Selection.TypeText finalStr
+    finalStr = "\section{" + strTestName + "}" + finalStr + Chr(13) + "\end{myitemize}"
+    readReplaceList
+    replaceList finalStr
 End Function
 
-Function cutApart(ByRef strQuestionAndAnswer As String) As String()
+Function cutApart(ByRef strQuestionAndAnswer As String, strType As String) As String()
     Dim re As Object
     Dim mMatches As Object      '匹配字符串集合对象
     Dim strTemp As String
     Set re = New RegExp
     re.Global = True
     re.Pattern = "([\n|\r|" + Chr(13) + "])+\d+．"
+    If re.test(strQuestionAndAnswer) = False Then MsgBox strType + "未发现题目！" + Chr(13) + "([\n|\r| + Chr(13) + ])+\d+．分割无效。"
     cutApart = Split(re.Replace(strQuestionAndAnswer, Chr(0)), Chr(0))
 End Function
 
-Function changeToCmdXZ(ByRef strQuestionAndAnswer() As String, ByRef finalStr As String)
+Function changeToCmdXZA(ByRef strQuestionAndAnswer() As String, ByRef finalStr As String)
     Dim strQuestion() As String
     Dim strAnswer As String
     Dim strTemp As String
@@ -793,13 +615,13 @@ Function changeToCmdXZ(ByRef strQuestionAndAnswer() As String, ByRef finalStr As
             If re.test(strTemp) = False Then
                 re.Pattern = "(( +)|\n|\r)A\.(.)+B\.(.)+C\.(.)+D\.(.)+"
                 If re.test(strTemp) = True Then
-                    re.Pattern = "[\n|\r|" + Chr(13) + "]" + "A."
+                    re.Pattern = "[\n|\r|" + Chr(13) + "]" + "A\."
                     strTemp = re.Replace(strTemp, Chr(0))
-                    re.Pattern = "(( +)|\n|\r)B."
+                    re.Pattern = "(( +)|\n|\r)B\."
                     strTemp = re.Replace(strTemp, Chr(0))
-                    re.Pattern = "(( +)|\n|\r)C."
+                    re.Pattern = "(( +)|\n|\r)C\."
                     strTemp = re.Replace(strTemp, Chr(0))
-                    re.Pattern = "(( +)|\n|\r)D."
+                    re.Pattern = "(( +)|\n|\r)D\."
                     strTemp = re.Replace(strTemp, Chr(0))
                 End If
             Else
@@ -836,6 +658,92 @@ Function changeToCmdXZ(ByRef strQuestionAndAnswer() As String, ByRef finalStr As
     Next i
 End Function
 
+Function changeToCmdXZ(ByRef strQuestionAndAnswer() As String, ByRef finalStr As String)
+    Dim strQuestion() As String
+    Dim strAnswer As String
+    Dim strTemp As String
+    Dim str As String
+    Dim re As Object
+    Dim mMatches As Object      '匹配字符串集合对象
+    Set re = New RegExp
+    re.Global = True
+    '下标可能越界
+    If firstQuestionFlag = True Then
+        finalStr = finalStr + strQuestionAndAnswer(0) + Chr(13) + "\begin{myitemize}" + Chr(13)
+        firstQuestionFlag = False
+    Else
+        finalStr = finalStr + Chr(13) + "\end{myitemize}" + strQuestionAndAnswer(0) + Chr(13) + "\begin{myitemize}" + Chr(13)
+    End If
+    For i = 1 To UBound(strQuestionAndAnswer)
+        str = strQuestionAndAnswer(i)
+        re.Pattern = "【解析】" '"【解答】"
+        If re.test(str) = True Then
+            Set mMatches = re.Execute(str)
+            strTemp = Mid(str, 1, mMatches(0).FirstIndex)
+            strAnswer = Mid(str, mMatches(0).FirstIndex + mMatches(0).Length + 1)
+            
+            
+            strQuestion = splitXX(strTemp)
+            ''''''''''''''''''''''''''''''''''''''''''''''''''''
+            ''delEndEnter strQuestion(UBound(strQuestion))
+            For j = 0 To UBound(strQuestion)
+                delEndEnter strQuestion(j)
+                insertDollerT strQuestion(j)
+                '修正
+                correct strQuestion(j)
+            Next j
+            insertDollerT strAnswer
+            re.Pattern = "故选"
+            '修正
+            correct strAnswer
+            strAnswer = re.Replace(strAnswer, Chr(13) + "\hh\color{blue}故选")
+            lastReplace strAnswer
+            finalStr = finalStr + Chr(13) + "\itemX{" + returnID(questionID) + "}{" + strQuestion(0) + "\xz }"
+            For k = 1 To UBound(strQuestion)
+                finalStr = finalStr + Chr(13) + "{" + strQuestion(k) + "}"
+            Next k
+            For k = k To 4
+                finalStr = finalStr + Chr(13) + "{\color{red}选项未识别}"
+            Next k
+            finalStr = finalStr + Chr(13) + "{" + strAnswer + "}"
+        Else
+            strUnidentified = strUnidentified + str + Chr(13)
+            Unidentified = Unidentified + 1
+        End If
+        DoEvents
+    Next i
+End Function
+
+Function splitXX(ByVal str As String) As String()
+    
+    Dim strTemp As String
+    Dim strTG As String
+    Dim strXX As String
+    Dim re As Object
+    Dim mMatches As Object      '匹配字符串集合对象
+    Set re = New RegExp
+    re.Global = True
+    re.Pattern = "[\n|\r|" + Chr(13) + "]" + "A[．\.]"
+    Set mMatches = re.Execute(str)
+    If mMatches.Count = 1 Then
+        strTG = Left(str, mMatches(0).FirstIndex)
+        strXX = Mid(str, mMatches(0).FirstIndex + 1)
+        re.Pattern = "[A-D][\.．]"
+        Set mMatches = re.Execute(strXX)
+        If mMatches.Count = 4 Then
+            strXX = re.Replace(strXX, Chr(0))
+            strTemp = strTG + strXX
+        Else
+            strTemp = str
+            MsgBox "选项未能分割为4项！"
+        End If
+    Else
+        strTemp = str
+        MsgBox "未找到A选项分界！" + Chr(13) + "[\n|\r| + Chr(13) + ]" + "A[．\.]"
+    End If
+    splitXX = Split(strTemp, Chr(0))
+End Function
+
 Function lastReplace(ByRef str As String)
     Dim re As Object
     Set re = New RegExp
@@ -845,54 +753,7 @@ Function lastReplace(ByRef str As String)
     re.Pattern = "\\\\\\TabMinipage"
     str = re.Replace(str, "\hh\TabMinipage")
 End Function
-Function splitXZ(ByRef str As String)
-    Dim strTemp As String
-    Dim re As Object
-    Dim mMatches As Object      '匹配字符串集合对象
-    Dim index As Long
-    
-    Set re = New RegExp
-    re.Global = True
-    re.Pattern = "(( +)|\n|\r)A．(.)+B．(.)+C．(.)+D．(.)+"
-    If re.test(str) = True Then
-    
-    Else
-        re.Pattern = "(( +)|\n|\r)A\.(.)+B\.(.)+C\.(.)+D\.(.)+"
-        If re.test(str) = True Then
-            Set mMatches = re.Execute(str)
-            For i = 0 To mMatches.Count
-                
-            Next
-        Else
-            MsgBox "选项有问题！"
-            Exit Function
-        End If
-    End If
-    Set mMatches = re.Execute(str)
-    re.Pattern = "[\n|\r|" + Chr(13) + "]" + "A．"
-    strTemp = re.Replace(strTemp, Chr(0))
-    re.Pattern = "(( *)|\n|\r)B．"
-    strTemp = re.Replace(strTemp, Chr(0))
-    re.Pattern = "(( *)|\n|\r)C．"
-    strTemp = re.Replace(strTemp, Chr(0))
-    re.Pattern = "(( *)|\n|\r)D．"
-    If re.test(strTemp) = False Then
-        re.Pattern = "(( +)|\n|\r)A\.(.)+B\.(.)+C\.(.)+D\.(.)+"
-        If re.test(strTemp) = True Then
-            re.Pattern = "[\n|\r|" + Chr(13) + "]" + "A."
-            strTemp = re.Replace(strTemp, Chr(0))
-            re.Pattern = "(( +)|\n|\r)B."
-            strTemp = re.Replace(strTemp, Chr(0))
-            re.Pattern = "(( +)|\n|\r)C."
-            strTemp = re.Replace(strTemp, Chr(0))
-            re.Pattern = "(( +)|\n|\r)D."
-            strTemp = re.Replace(strTemp, Chr(0))
-        End If
-    Else
-        strTemp = re.Replace(strTemp, Chr(0))
-    End If
 
-End Function
 Function changeToCmdTK(ByRef strQuestionAndAnswer() As String, ByRef finalStr As String)
     Dim strQuestion As String
     Dim strAnswer As String
@@ -903,6 +764,13 @@ Function changeToCmdTK(ByRef strQuestionAndAnswer() As String, ByRef finalStr As
     Set re = New RegExp
     re.Global = True
     '下标可能越界
+    If firstQuestionFlag = True Then
+        finalStr = finalStr + strQuestionAndAnswer(0) + Chr(13) + "\begin{myitemize}" + Chr(13)
+        firstQuestionFlag = False
+    Else
+        finalStr = finalStr + Chr(13) + "\end{myitemize}" + strQuestionAndAnswer(0) + Chr(13) + "\begin{myitemize}" + Chr(13)
+    End If
+
     For i = 1 To UBound(strQuestionAndAnswer)
         str = strQuestionAndAnswer(i)
         re.Pattern = "【解析】" '"【解答】"
@@ -942,6 +810,13 @@ Function changeToCmdJD(ByRef strQuestionAndAnswer() As String, ByRef finalStr As
     Set re = New RegExp
     re.Global = True
     '下标可能越界
+    If firstQuestionFlag = True Then
+        finalStr = finalStr + strQuestionAndAnswer(0) + Chr(13) + "\begin{myitemize}" + Chr(13)
+        firstQuestionFlag = False
+    Else
+        finalStr = finalStr + Chr(13) + "\end{myitemize}" + strQuestionAndAnswer(0) + Chr(13) + "\begin{myitemize}" + Chr(13)
+    End If
+
     For i = 1 To UBound(strQuestionAndAnswer)
         str = strQuestionAndAnswer(i)
         re.Pattern = "【解析】" '"【解答】"
@@ -987,11 +862,11 @@ Function questionList(ByRef strQuestion As String)
             insertDollerT str(i)
             correct str(i)
         Next
-        strQuestion = str(0) + Chr(13) + "\begin{myitemize}"
+        strQuestion = str(0) + Chr(13) + "\begin{questionList}"    'questionList
         For i = 1 To UBound(str)
             strQuestion = strQuestion + Chr(13) + "\itemQ " + str(i)
         Next
-        strQuestion = strQuestion + Chr(13) + "\end{myitemize}"
+        strQuestion = strQuestion + Chr(13) + "\end{questionList}" 'questionList
     Else
         insertDollerT strQuestion
         correct strQuestion
@@ -1119,7 +994,8 @@ Function correctArray(ByRef str As String)
     Dim mMatches As Object      '匹配字符串集合对象
     Dim mMatch As Object        '匹配字符串
     Dim prev As Long
-    Dim strTemp, tempXiuZheng As String
+    Dim strTemp As String
+    Dim tempXiuZheng As String
     Dim n As Long
     
     tempXiuZheng = ""
@@ -1136,7 +1012,8 @@ Function correctArray(ByRef str As String)
             If prev < mMatch.FirstIndex Then
                 strTemp = Mid(str, prev, mMatch.FirstIndex + 1 - prev)
                 If prev > 1 Then
-                    strTemp = re.Replace(strTemp, "\end{cases}")
+                    'strTemp = re.Replace(strTemp, "\end{cases}")
+                    matchendarray strTemp
                 End If
                 tempXiuZheng = tempXiuZheng + strTemp + "\begin{cases}"
                 prev = mMatch.FirstIndex + mMatch.Length + 1
@@ -1144,10 +1021,61 @@ Function correctArray(ByRef str As String)
             DoEvents
         Next
         strTemp = Mid(str, prev)
-        strTemp = re.Replace(strTemp, "\end{cases}")
+        'strTemp = re.Replace(strTemp, "\end{cases}")
+        matchendarray strTemp
         str = tempXiuZheng + strTemp
     End If
 End Function
+
+Function matchendarray(ByRef str As String) As Boolean
+    Dim re As Object
+    Dim mMatches As Object      '匹配字符串集合对象
+    Dim mMatch As Object        '匹配字符串
+    Dim prev As Long
+    Dim flag As Long
+    Dim n As Long
+    Dim strTemp, tempXiuZheng As String
+    
+    tempXiuZheng = ""
+    flag = 0
+    Set re = New RegExp
+    re.Global = True
+    prev = 1
+    
+    re.Pattern = "(\\begin\{array\})|(\\end\{array\})"
+    Set mMatches = re.Execute(str)
+    If mMatches.Count > 0 Then
+        For n = 0 To mMatches.Count - 1
+            If CStr(mMatches(n).Value) = "\begin{array}" Then
+                flag = flag + 1
+            ElseIf CStr(mMatches(n).Value) = "\end{array}" Then
+                flag = flag - 1
+            End If
+            If flag < 0 Then Exit For
+        Next
+        strTemp = Left(str, mMatches(n).FirstIndex)
+        strTemp = strTemp + "\end{cases}" + Mid(str, mMatches(n).FirstIndex + mMatches(n).Length + 1)
+    End If
+    
+    re.Pattern = "(\\left(\.|\(|\[|\\\{|\||\\\||\\[a-zA-Z]+|/|\)|\]|\\\}))|(\\right(\.|\)|\]|\\\}|\||\\\||\\[a-zA-Z]+|\(|\[|\\\{|/))"
+    Set mMatches = re.Execute(strTemp)
+    flag = 0
+    
+    If mMatches.Count > 0 Then
+        For n = 0 To mMatches.Count - 1
+            If Left(CStr(mMatches(n).Value), 2) = "\l" Then
+                flag = flag + 1
+            ElseIf Left(CStr(mMatches(n).Value), 2) = "\r" Then
+                flag = flag - 1
+            End If
+            If flag < 0 Then Exit For
+        Next
+        tempXiuZheng = Left(strTemp, mMatches(n).FirstIndex)
+        tempXiuZheng = tempXiuZheng + Mid(strTemp, mMatches(n).FirstIndex + mMatches(n).Length + 1)
+    End If
+    str = tempXiuZheng
+End Function
+
 Function correctCases(ByRef str As String)
     Dim re As Object
     Dim mMatches As Object      '匹配字符串集合对象
@@ -1305,8 +1233,11 @@ Function correctMathScript(ByRef s As String, strPattern As String, Optional bra
             End If
             prev = nextRightBrace(mMatch.FirstIndex + mMatch.Length + 1, s)
             For i = 2 To braceNum
-                prev = prev + 2
-                prev = nextRightBrace(prev, s)
+                'prev = prev + 2
+                'prev = nextRightBrace(prev, s)
+                prev = prev + 1
+                nextLBrace prev, s
+                prev = nextRightBrace(prev + 1, s)
             Next i
             strDScript = Mid(s, mMatch.FirstIndex + 1, prev - mMatch.FirstIndex) '截取下标_{*}
             
@@ -1335,7 +1266,7 @@ nextmMatch:
     End If
 End Function
 
-Function nextLBrace(ByRef coordinate As Long, ByVal str As String) As Boolean
+Public Function nextLBrace(ByRef coordinate As Long, ByVal str As String) As Boolean
     Dim c As String
     Dim l As Long
     Dim index As Long
@@ -1356,6 +1287,63 @@ Function nextLBrace(ByRef coordinate As Long, ByVal str As String) As Boolean
     Loop While True
 End Function
 
+Function readAcmd(ByVal coordinate As Long, ByVal str As String, ByRef strCMD As String) As Long
+    Dim c As String                                                     '返回值为命令结尾字符坐标
+    Dim l As Long
+    Dim index As Long
+    Dim cmdStartFlag As Boolean
+    
+    cmdStartFlag = False
+    index = coordinate
+    strCMD = ""
+    l = Len(str)
+    
+    Do
+        If index <= l Then
+            c = Mid(str, index, 1)
+            If c = " " Then         '读取下一个字符
+            ElseIf c = "{" Then
+                If cmdStartFlag = False Then
+                    strCMD = c
+                    readAcmd = index
+                Else
+                    readAcmd = index - 1
+                End If
+                Exit Function
+            ElseIf c = "\" Then
+                If cmdStartFlag = False Then
+                    cmdStartFlag = True
+                    strCMD = strCMD + c
+                Else
+                    readAcmd = index
+                    Exit Function
+                End If
+            ElseIf InStr(1, "0123456789", c) > 0 Then
+                If cmdStartFlag = False Then
+                    strCMD = c
+                    readAcmd = index
+                Else
+                    readAcmd = index - 1
+                End If
+                Exit Function
+            ElseIf InStr(1, "abcdefghijklmnopqrstuvwxyz", c) > 0 Or InStr(1, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", c) > 0 Then
+                If cmdStartFlag = False Then
+                    strCMD = c
+                    readAcmd = index
+                    Exit Function
+                Else
+                    strCMD = strCMD + c
+                End If
+            Else
+                readAcmd = index
+                Exit Function
+            End If
+            index = index + 1
+        Else
+            Exit Function
+        End If
+    Loop While True
+End Function
 Function delEndEnter(ByRef str As String)
     Dim i As Long
     Dim c As String
@@ -1662,6 +1650,7 @@ Private Function splitNode(ByRef mylink As DBLink, ByVal str As String, ByVal in
     Set re = New RegExp
     re.Pattern = "(\\left(\.|\(|\[|\\\{|\||\\\||\\[a-zA-Z]+|/|\)|\]|\\\}))|(\\right(\.|\)|\]|\\\}|\||\\\||\\[a-zA-Z]+|\(|\[|\\\{|/))"
     re.Global = True
+    're.IgnoreCase = True
     prev = 1
     
     'str = "5．已知向量$\vec{a},\vec{b}$满足$\left| \vec{a}\right| =3,\left| \frac{a}{b}\right| =2\sqrt{3}$，且$\vec{a}\bot \left(\vec{a}+\vec{b}\right)$，则$\vec{b}$在$\vec{a}$方向上的投影为（ ）"
@@ -1699,7 +1688,7 @@ Private Function splitNode(ByRef mylink As DBLink, ByVal str As String, ByVal in
                     If stack < 0 Then Exit For
                 Next
                 If j >= mMatches.Count Then
-                    MsgBox "have no right"
+                    MsgBox "have no right" & Chr(13) & Mid(str, mMatches(i).FirstIndex, 50)
                     splitNode = False
                     Exit Function
                 Else
@@ -1721,7 +1710,7 @@ Private Function splitNode(ByRef mylink As DBLink, ByVal str As String, ByVal in
                     prev = mMatches(j).FirstIndex + mMatches(j).Length + 1
                 End If
             Else
-                MsgBox "have no right here"
+                MsgBox "have no right here" & Chr(13) & Mid(str, mMatches(i).FirstIndex, 50)
                 splitNode = False
                 Exit Function
             End If
@@ -1877,7 +1866,9 @@ Public Function replaceSymbol(ByRef str As String, ByVal strName As String)
             End If
         Next
 End Function
-
+Public Function tr()
+replaceSymbolList
+End Function
 Private Function replaceSymbolList() As Boolean
     Dim TextLine As String
     Dim strTemp As String
@@ -1886,7 +1877,7 @@ Private Function replaceSymbolList() As Boolean
     On Error GoTo err1
     readUTF8 replaceSymbolListFile, strTemp
     strTemp = Replace(strTemp, Chr(10), "")
-    strReplaceSymbolList = Split(Right(strTemp, Len(strTemp) - 1), Chr(13))
+    strReplaceSymbolList = Split(strTemp, Chr(13))
     replaceSymbolList = True
     Exit Function
 err1:
@@ -1898,14 +1889,37 @@ err1:
     replaceSymbolList = False
 End Function
 
-Public Function replaceList() As Boolean
-    Dim TextLine As String
+Public Function readReplaceList() As Boolean
+    Dim TextLine() As String
+    Dim fr() As String
     Dim strTemp As String
+    Dim i As Long, j As Long
+    Dim re As Object
+    
+    Set re = New RegExp
+    re.Global = True
+    
     On Error GoTo err1
     readUTF8 replaceListFile, strTemp
     strTemp = Replace(strTemp, Chr(10), "")
-    strReplaceList = Split(Right(strTemp, Len(strTemp) - 1), Chr(13))
-    replaceList = True
+    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    TextLine = Split(strTemp, Chr(13))
+    ReDim strReplaceList(UBound(TextLine), 1)
+    j = -1
+    For i = 0 To UBound(TextLine)
+        fr = Split(TextLine(i), ";")
+        If UBound(fr) = 1 Then
+            j = j + 1
+            strReplaceList(j, 0) = fr(0)
+            strReplaceList(j, 1) = fr(1)
+        Else
+            readReplaceList = False
+            Exit Function
+        End If
+    Next
+    ReDim Preserve strReplaceList(j, 1)
+    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    readReplaceList = True
     Exit Function
 err1:
     If Err.Number = 53 Then
@@ -1913,12 +1927,11 @@ err1:
     Else
         MsgBox Err.Number
     End If
-    replaceList = False
+    readReplaceList = False
 End Function
 
 Public Function replaceMacros()
     Dim str As String
-    Dim fr() As String
     Dim re As Object
     Dim mMatches As Object
     
@@ -1928,28 +1941,70 @@ Public Function replaceMacros()
     Dim docxFileName
     For Each docxFileName In strFullName
         readUTF8 docxFileName, str
-        For i = 0 To UBound(strReplaceList)
-            fr = Split(strReplaceList(i), ";")
-            If UBound(fr) = 1 Then
-                If Left(fr(0), 1) = "#" Then
-                    fr(0) = Replace(fr(0), "\n", Chr(13))
-                    re.Pattern = Right(fr(0), Len(fr(0)) - 1)
-    Set mMatches = re.Execute(str)
-                    str = re.Replace(str, fr(1))
-                Else
-                    str = Replace(str, fr(0), fr(1))
-                End If
-            Else
-                MsgBox "第" & i + 1 & "行  " & strReplaceList(i)
-                Exit Function
-            End If
-        Next
-        'Debug.Print str
-        If correctLeftRightFlag = True Then
-            str = delLeftRight(str)
-            correctLeftRight str
-        End If
+        replaceList str
         writeTex str, CStr(docxFileName)
     Next
 End Function
 
+Function replaceList(ByRef str As String)
+    Dim re As Object
+    Dim mMatches As Object
+    
+    Set re = New RegExp
+    re.Global = True
+    
+    For i = 0 To UBound(strReplaceList)
+        If Left(strReplaceList(i, 0), 1) = "#" Then
+            re.Pattern = Replace(Mid(strReplaceList(i, 0), 2), "\n", Chr(13))
+            str = re.Replace(str, Replace(strReplaceList(i, 1), "\n", Chr(13)))
+        Else
+            str = Replace(str, strReplaceList(i, 0), strReplaceList(i, 1))
+        End If
+    Next
+    
+    If correctLeftRightFlag = True Then
+        str = delLeftRight(str)
+        correctLeftRight str
+    End If
+End Function
+
+Public Function te()
+    Dim doc As String
+    Dim texFileName
+    allFilesName = ""
+    strUnidentified = ""
+    If fileSelect = False Then
+        strFullName = selectFile(1)
+    End If
+    If strFullName(0) <> "" Then
+        For Each texFileName In strFullName
+            doc = ""
+            readUTF8 CStr(texFileName), doc
+            joinQuestionAndAnswer doc
+            writeTex doc, CStr(texFileName)
+        Next
+    End If
+End Function
+
+Private Function joinQuestionAndAnswer(ByRef doc As String) As Boolean
+    Dim re As Object
+    Dim mMatchesQ As Object      '匹配字符串集合对象，题干
+    Dim mMatchesA As Object      '匹配字符串集合对象，解析
+    Dim str As String
+    Dim qAa() As String  'question and answer
+    Dim strQuestion As String
+    Dim strAnswer As String
+    Set re = New RegExp
+    
+    re.Global = True
+    re.Pattern = "(\n|\r|" + Chr(13) + ")" + "参考答案"
+
+    If re.test(doc) Then
+        str = re.Replace(doc, Chr(0))
+        qAa = Split(str, Chr(0))
+        re.Pattern = "([\n|\r|" + Chr(13) + "])+(\d+．)"
+        Set mMatchesQ = re.Execute(qAa(0))
+        Set mMatchesA = re.Execute(qAa(1))
+    Else
+    End If
+End Function

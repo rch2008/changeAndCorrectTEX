@@ -1,5 +1,5 @@
 ﻿\\log;\log 
-\\lg;\lg
+\\lg;\lg 
 \\ln;\ln 
 \\sin;\sin 
 \\cos;\cos 
@@ -10,13 +10,23 @@
 {\therefore};\therefore 
 {\cdot};\cdot 
 {\in};\in 
-\overrightarrow;\vv
+\overrightarrow;\vv 
 #\{ {0,}\\uppi {0,}\};\uppi 
 {\div};\div 
-\bot;\perp
+\bot;\perp 
 {\bot};\perp 
 {\pm};\pm 
 {\angle};\angle 
 {\neq};\neq 
+{\cap};\cap 
+{\cup};\cup 
 {\Rightarrow};\Rightarrow 
+{\uplambda};\uplambda 
+{\geqslant};\geqslant 
+{\leqslant};\leqslant 
+{\approx};\approx 
+{\ldots};\ldots 
+{\forall};\forall 
+{\exists};\exists 
+#\\tk(?!\w);\tk 
 # {2,}; 

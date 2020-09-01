@@ -1,5 +1,4 @@
-﻿单选题;选择题
-【解答】|【答案】;【解析】
+﻿【解答】|【答案】;【解析】
 '删除\privateuse
 \\privateuse(\{\})?;
 '删除\newline
@@ -26,8 +25,11 @@
 '替换减号
 －;-
 −;-
+\\textendash\{\};-
+\\textemdash\{\};-
 '替换减号
 ﹣;-
+±;\pm 
 '替换等号
 ＝;=
 '替换不等号
@@ -47,11 +49,14 @@
 \\geq(?!slant);\geqslant
 '≤
 \\leq(?!slant);\leqslant
+°;^\circ 
+△;\triangle 
 '\Delta->△
 \\Updelta ([A-Z]{3});\triangle $1
 \\Delta ([A-Z]{3});\triangle $1
 \{\\Updelta\}([A-Z]{3});\triangle $1
 \{\\Delta\}([A-Z]{3});\triangle $1
+\\cancel\{\\subset \};\not\subset 
 (\\_)+;\tk 
 '\sum\limits
 \\sum(?= |_|\\);\sum\limits
@@ -108,7 +113,7 @@ p\{([a-zA-Z0-9\.+-\\ ])+\}\|;c|
 '删除图片宽度设定
 (\[width=1\\textwidth\])|(\[width=0\.[0-9]+\\textwidth\]);[width=\lFigWidth]
 \.docx\.tmp/word/media;
-
+\\includegraphics;  \includegraphics
 'Dim arr() As String
 'arr = Split(strName, \
 'arr = Split(arr(UBound(arr)), ".")
