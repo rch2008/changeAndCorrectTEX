@@ -901,6 +901,7 @@ Function insertDollerT(ByRef str As String)
 End Function
 
 Function correct(ByRef str As String)
+    correctAlign str
     correctArray str
     correctCases str
     correctFig str
@@ -2007,4 +2008,54 @@ Private Function joinQuestionAndAnswer(ByRef doc As String) As Boolean
         Set mMatchesA = re.Execute(qAa(1))
     Else
     End If
+End Function
+
+
+Function correctAlign(ByRef str As String)
+    Dim re As Object
+    Dim mMatches As Object      'Æ¥Åä×Ö·û´®¼¯ºÏ¶ÔÏó
+    Dim mMatch As Object        'Æ¥Åä×Ö·û´®
+    Dim prev As Long
+    Dim strTemp, tempXiuZheng As String
+    Dim n As Long
+    
+    tempXiuZheng = ""
+    Set re = New RegExp
+    re.Global = True
+    prev = 1
+    
+    re.Pattern = "(\\begin\{align\*\})|(\\end\{align\*\})"
+    Set mMatches = re.Execute(str)
+    If mMatches.Count > 0 Then
+        For n = 0 To mMatches.Count - 1 Step 2
+            tempXiuZheng = tempXiuZheng + Mid(str, prev, mMatches(n).FirstIndex - prev + 1)
+            strTemp = Mid(str, mMatches(n).FirstIndex + mMatches(n).Length + 1, mMatches(n + 1).FirstIndex - mMatches(n).FirstIndex - mMatches(n).Length)
+            
+            re.Pattern = "\$"
+            If re.test(strTemp) Then
+                strTemp = re.Replace(strTemp, "")
+            End If
+            re.Pattern = "\&"
+            If re.test(strTemp) Then
+                strTemp = re.Replace(strTemp, "")
+            End If
+            re.Pattern = "\{array\}"
+            If re.test(strTemp) = False Then
+                re.Pattern = "\\\\"
+                If re.test(strTemp) Then
+                    strTemp = re.Replace(strTemp, "$" & Chr(13) & "$")
+                End If
+            End If
+
+            're.Pattern = "£¬"
+            'If re.test(strTemp) Then
+            '    strTemp = re.Replace(strTemp, ",")
+            'End If
+            tempXiuZheng = tempXiuZheng + strTemp
+            prev = mMatches(n + 1).FirstIndex + mMatches(n + 1).Length + 1
+            DoEvents
+        Next n
+        str = tempXiuZheng + Mid(str, prev)
+    End If
+
 End Function
