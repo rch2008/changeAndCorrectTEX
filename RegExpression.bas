@@ -237,19 +237,8 @@ Function cutDocument(ByRef str As String) As String
         s = re.Replace(s, Chr(13))
         re.Pattern = "声明：(.)+25151492"
         s = re.Replace(s, "")
-        re.Pattern = "参考答案与试题解析"
-        s = re.Replace(s, "")
-        're.Pattern = "@L"
-        's = re.Replace(s, "[")
-        're.Pattern = "@R"
-        's = re.Replace(s, "]")
-        re.IgnoreCase = True
-        re.Pattern = "@start(XZ|TK|JD)"
-        s = re.Replace(s, "")
-        re.Pattern = "@end"
-        s = re.Replace(s, "")
-        re.Pattern = "@"
-        s = re.Replace(s, "\at ")
+        're.Pattern = "参考答案与试题解析"
+        's = re.Replace(s, "")
     Else
         MsgBox "document环境不匹配！"
     End If
@@ -499,10 +488,6 @@ nextUscript:
     End If
 End Function
 
-'Function insertAt(ByRef str As String)
-
-'End Function
-
 Function cutXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileName As String)
     Dim re As Object
     Dim mMatches As Object      '匹配字符串集合对象
@@ -586,76 +571,6 @@ Function cutApart(ByRef strQuestionAndAnswer As String, strType As String) As St
     re.Pattern = "([\n|\r|" + Chr(13) + "])+\d+．"
     If re.test(strQuestionAndAnswer) = False Then MsgBox strType + "未发现题目！" + Chr(13) + "([\n|\r| + Chr(13) + ])+\d+．分割无效。"
     cutApart = Split(re.Replace(strQuestionAndAnswer, Chr(0)), Chr(0))
-End Function
-
-Function changeToCmdXZA(ByRef strQuestionAndAnswer() As String, ByRef finalStr As String)
-    Dim strQuestion() As String
-    Dim strAnswer As String
-    Dim strTemp As String
-    Dim str As String
-    Dim re As Object
-    Dim mMatches As Object      '匹配字符串集合对象
-    Set re = New RegExp
-    re.Global = True
-    '下标可能越界
-    For i = 1 To UBound(strQuestionAndAnswer)
-        str = strQuestionAndAnswer(i)
-        re.Pattern = "【解析】" '"【解答】"
-        If re.test(str) = True Then
-            Set mMatches = re.Execute(str)
-            strTemp = Mid(str, 1, mMatches(0).FirstIndex)
-            strAnswer = Mid(str, mMatches(0).FirstIndex + mMatches(0).Length + 1)
-            re.Pattern = "[\n|\r|" + Chr(13) + "]" + "A．"
-            strTemp = re.Replace(strTemp, Chr(0))
-            re.Pattern = "(( *)|\n|\r)B．"
-            strTemp = re.Replace(strTemp, Chr(0))
-            re.Pattern = "(( *)|\n|\r)C．"
-            strTemp = re.Replace(strTemp, Chr(0))
-            re.Pattern = "(( *)|\n|\r)D．"
-            If re.test(strTemp) = False Then
-                re.Pattern = "(( +)|\n|\r)A\.(.)+B\.(.)+C\.(.)+D\.(.)+"
-                If re.test(strTemp) = True Then
-                    re.Pattern = "[\n|\r|" + Chr(13) + "]" + "A\."
-                    strTemp = re.Replace(strTemp, Chr(0))
-                    re.Pattern = "(( +)|\n|\r)B\."
-                    strTemp = re.Replace(strTemp, Chr(0))
-                    re.Pattern = "(( +)|\n|\r)C\."
-                    strTemp = re.Replace(strTemp, Chr(0))
-                    re.Pattern = "(( +)|\n|\r)D\."
-                    strTemp = re.Replace(strTemp, Chr(0))
-                End If
-            Else
-                strTemp = re.Replace(strTemp, Chr(0))
-            End If
-            
-            strQuestion = Split(strTemp, Chr(0))
-            ''''''''''''''''''''''''''''''''''''''''''''''''''''
-            delEndEnter strQuestion(UBound(strQuestion))
-            For j = 0 To UBound(strQuestion)
-                insertDollerT strQuestion(j)
-                '修正
-                correct strQuestion(j)
-            Next j
-            insertDollerT strAnswer
-            re.Pattern = "故选"
-            '修正
-            correct strAnswer
-            strAnswer = re.Replace(strAnswer, Chr(13) + "\hh\color{blue}故选")
-            lastReplace strAnswer
-            finalStr = finalStr + Chr(13) + "\itemX{" + returnID(questionID) + "}{" + strQuestion(0) + "\xz }"
-            For k = 1 To UBound(strQuestion)
-                finalStr = finalStr + Chr(13) + "{" + strQuestion(k) + "}"
-            Next k
-            For k = k To 4
-                finalStr = finalStr + Chr(13) + "{\color{red}选项未识别}"
-            Next k
-            finalStr = finalStr + Chr(13) + "{" + strAnswer + "}"
-        Else
-            strUnidentified = strUnidentified + str + Chr(13)
-            Unidentified = Unidentified + 1
-        End If
-        DoEvents
-    Next i
 End Function
 
 Function changeToCmdXZ(ByRef strQuestionAndAnswer() As String, ByRef finalStr As String)
@@ -1499,47 +1414,6 @@ Function nextRightBrace(ByVal coordinate As Long, ByVal str As String) As Long
     nextRightBrace = coordinate
 End Function
 
-Function selectFileA(index As Integer) As String()
-'
-' 通过打开对话框选择tex文件
-'
-'
-    Dim fileDlg As Object           ' 文件对话框
-    Dim str() As String
-    Dim sNothing(0) As String
-    Dim strTemp As String
-    sNothing(0) = ""
-    ' 变量初始化
-    MsgBox "before"
-    Set fileDlg = CreateObject("MSComDlg.CommonDialog")
-    MsgBox "created"
-    ' 打开附件
-     fileDlg.DialogTitle = "选择tex文件"
-    ' 设置过滤器
-    fileDlg.Filter = "tex Files(*.tex)|*.tex|" & _
-                     "Word (*.docx)|*.docx|" & _
-                     "All Files(*.*)|*.*|"
-    fileDlg.FilterIndex = index
-    fileDlg.flags = &H80200
-    fileDlg.MaxFileSize = 32767
-    fileDlg.ShowOpen
-    If fileDlg.FileName <> "" Then
-        str = Split(fileDlg.FileName, Chr(0))      ' 取得附件路径
-        t = UBound(str)
-        If t > 0 Then
-            For i = 1 To t
-                str(i) = str(0) & "\" & str(i)
-            Next i
-            str(0) = ""
-            strTemp = Join(str, "?")
-            strTemp = Mid(strTemp, 2, Len(strTemp) - 1)
-            str = Split(strTemp, "?")
-        End If
-        selectFileA = str
-    Else
-        selectFileA = sNothing
-    End If
-End Function
 Function readINI() As Boolean
 '    questionID = 题目ID号
 '    figID = 图片ID号
