@@ -1761,6 +1761,7 @@ err1:
     Else
         MsgBox Err.Number
     End If
+    strReplaceSymbolList = Split("", " ")
     replaceSymbolList = False
 End Function
 
