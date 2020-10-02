@@ -170,6 +170,108 @@ Function Main()
     End If
 End Function
 
+Function JoinTest() As String
+    Dim doc As String
+    Dim str As String
+    Dim arr() As String
+    Dim finalStr As String
+    Dim allFilesName As String
+    Dim texFileName
+    allFilesName = ""
+    strUnidentified = ""
+    If fileSelect = False Then
+        strFullName = selectFile(1)
+    End If
+    If strFullName(0) <> "" Then
+        For Each texFileName In strFullName
+            finalStr = ""
+            readUTF8 texName(texFileName), doc
+            cutDocument doc        '去头尾，去双换行，删除带括号命令
+            replaceSymbol doc, texFileName       '替换，删除一些符号
+            correctUDscript doc    '双上下标
+            joinXTJ doc, finalStr, texFileName
+            arr = Split(texFileName, ".")
+            writeTex finalStr, Left(texFileName, Len(texFileName) - Len(arr(UBound(arr))) - 1) + "_Join.tex"
+        Next
+    End If
+    JoinTest = finalStr
+End Function
+
+Function joinXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileName As String)
+    Dim re As Object
+    Dim mMatches As Object      '匹配字符串集合对象
+    Dim strTemp, str As String
+    Dim strXZ As String
+    Dim strTK As String
+    Dim strJD As String
+    Dim arr() As String
+    Dim t() As String
+    Dim docQuestion As String
+    Dim arrAnswer() As String
+    Dim index As Long
+    
+    Set re = New RegExp
+    strXZ = ""
+    strTK = ""
+    strJD = ""
+    
+    re.Global = True
+    
+    re.Pattern = "(\n|\r|" + Chr(13) + ")" + "参考答案"
+    doc = re.Replace(doc, Chr(0))
+    t = Split(doc, Chr(0))
+    docQuestion = t(0)
+    arrAnswer = cutApart(t(1), "")
+    index = 1
+    
+    re.Pattern = "(\n|\r|" + Chr(13) + ")" + "\S{0,2}(选择|填空|解答|多选|单选)题"
+
+    If re.test(docQuestion) Then
+        firstQuestionFlag = True
+        Set mMatches = re.Execute(docQuestion)
+        strTestName = Mid(docQuestion, 1, mMatches(0).FirstIndex)
+        For i = 0 To mMatches.Count - 1
+            strTemp = mMatches(i).Value
+            If InStr(strTemp, "选择") > 0 Or InStr(strTemp, "多选") > 0 Or InStr(strTemp, "单选") > 0 Then
+                If i + 1 < mMatches.Count Then
+                    strXZ = Mid(docQuestion, mMatches(i).FirstIndex + 1, mMatches(i + 1).FirstIndex - mMatches(i).FirstIndex)
+                Else
+                    strXZ = Mid(docQuestion, mMatches(i).FirstIndex + 1)
+                End If
+                joinQA cutApart(strXZ, ""), finalStr, arrAnswer, index
+            ElseIf InStr(strTemp, "填空") > 0 Then
+                If i + 1 < mMatches.Count Then
+                    strTK = Mid(docQuestion, mMatches(i).FirstIndex + 1, mMatches(i + 1).FirstIndex - mMatches(i).FirstIndex)
+                Else
+                    strTK = Mid(docQuestion, mMatches(i).FirstIndex + 1)
+                End If
+                joinQA cutApart(strTK, ""), finalStr, arrAnswer, index
+            ElseIf InStr(strTemp, "解答") > 0 Then
+                If i + 1 < mMatches.Count Then
+                    strJD = Mid(docQuestion, mMatches(i).FirstIndex + 1, mMatches(i + 1).FirstIndex - mMatches(i).FirstIndex)
+                Else
+                    strJD = Mid(docQuestion, mMatches(i).FirstIndex + 1)
+                End If
+                joinQA cutApart(strJD, ""), finalStr, arrAnswer, index
+            End If
+            DoEvents
+        Next i
+        finalStr = "\begin{document}" + Chr(13) + strTestName + finalStr + "\end{document}"
+    Else
+    
+    End If
+End Function
+
+Function joinQA(ByRef strQuestionAndAnswer() As String, ByRef finalStr As String, ByRef strAnswer() As String, ByRef index As Long)
+
+    finalStr = finalStr + strQuestionAndAnswer(0)
+    For i = 1 To UBound(strQuestionAndAnswer)
+        finalStr = finalStr + Chr(13) + strQuestionAndAnswer(i) + Chr(13) + strAnswer(index)
+        index = index + 1
+    Next
+
+End Function
+
 Function beforeChange()
     On Error GoTo err1
     Dim mySelection As Word.Selection
@@ -568,9 +670,13 @@ Function cutApart(ByRef strQuestionAndAnswer As String, strType As String) As St
     Dim strTemp As String
     Set re = New RegExp
     re.Global = True
-    re.Pattern = "([\n|\r|" + Chr(13) + "])+\d+．"
+    re.Pattern = "([\n|\r|" + Chr(13) + "])+(\d+．)"
     If re.test(strQuestionAndAnswer) = False Then MsgBox strType + "未发现题目！" + Chr(13) + "([\n|\r| + Chr(13) + ])+\d+．分割无效。"
-    cutApart = Split(re.Replace(strQuestionAndAnswer, Chr(0)), Chr(0))
+    If strType = "" Then
+        cutApart = Split(re.Replace(strQuestionAndAnswer, Chr(0) + "$1$2"), Chr(0))
+    Else
+        cutApart = Split(re.Replace(strQuestionAndAnswer, Chr(0)), Chr(0))
+    End If
 End Function
 
 Function changeToCmdXZ(ByRef strQuestionAndAnswer() As String, ByRef finalStr As String)
@@ -1741,9 +1847,7 @@ Public Function replaceSymbol(ByRef str As String, ByVal strName As String)
             End If
         Next
 End Function
-Public Function tr()
-replaceSymbolList
-End Function
+
 Private Function replaceSymbolList() As Boolean
     Dim TextLine As String
     Dim strTemp As String
@@ -1843,48 +1947,6 @@ Function replaceList(ByRef str As String)
         correctLeftRight str
     End If
 End Function
-
-Public Function te()
-    Dim doc As String
-    Dim texFileName
-    allFilesName = ""
-    strUnidentified = ""
-    If fileSelect = False Then
-        strFullName = selectFile(1)
-    End If
-    If strFullName(0) <> "" Then
-        For Each texFileName In strFullName
-            doc = ""
-            readUTF8 CStr(texFileName), doc
-            joinQuestionAndAnswer doc
-            writeTex doc, CStr(texFileName)
-        Next
-    End If
-End Function
-
-Private Function joinQuestionAndAnswer(ByRef doc As String) As Boolean
-    Dim re As Object
-    Dim mMatchesQ As Object      '匹配字符串集合对象，题干
-    Dim mMatchesA As Object      '匹配字符串集合对象，解析
-    Dim str As String
-    Dim qAa() As String  'question and answer
-    Dim strQuestion As String
-    Dim strAnswer As String
-    Set re = New RegExp
-    
-    re.Global = True
-    re.Pattern = "(\n|\r|" + Chr(13) + ")" + "参考答案"
-
-    If re.test(doc) Then
-        str = re.Replace(doc, Chr(0))
-        qAa = Split(str, Chr(0))
-        re.Pattern = "([\n|\r|" + Chr(13) + "])+(\d+．)"
-        Set mMatchesQ = re.Execute(qAa(0))
-        Set mMatchesA = re.Execute(qAa(1))
-    Else
-    End If
-End Function
-
 
 Function correctAlign(ByRef str As String)
     Dim re As Object

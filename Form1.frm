@@ -14,11 +14,19 @@ Begin VB.Form form_tex
    ScaleHeight     =   8025
    ScaleWidth      =   9555
    StartUpPosition =   3  '窗口缺省
+   Begin VB.CommandButton Command15 
+      Caption         =   "Join"
+      Height          =   495
+      Left            =   9000
+      TabIndex        =   43
+      Top             =   2040
+      Width           =   495
+   End
    Begin VB.Frame Frame8 
       Caption         =   "首次修正字符列表"
       Height          =   855
       Left            =   4680
-      TabIndex        =   41
+      TabIndex        =   40
       Top             =   1200
       Width           =   4815
       Begin VB.TextBox Text10 
@@ -26,7 +34,7 @@ Begin VB.Form form_tex
          Left            =   240
          MultiLine       =   -1  'True
          ScrollBars      =   2  'Vertical
-         TabIndex        =   43
+         TabIndex        =   42
          Text            =   "Form1.frx":0000
          Top             =   240
          Width           =   3735
@@ -35,7 +43,7 @@ Begin VB.Form form_tex
          Caption         =   "选择"
          Height          =   495
          Left            =   4080
-         TabIndex        =   42
+         TabIndex        =   41
          Top             =   240
          Width           =   615
       End
@@ -43,7 +51,7 @@ Begin VB.Form form_tex
    Begin VBCCR16.RichTextBox RichTextBox1 
       Height          =   5295
       Left            =   4680
-      TabIndex        =   40
+      TabIndex        =   39
       Top             =   2640
       Width           =   4815
       _ExtentX        =   8493
@@ -65,7 +73,7 @@ Begin VB.Form form_tex
       Caption         =   "重置ID"
       Height          =   495
       Left            =   3600
-      TabIndex        =   38
+      TabIndex        =   37
       Top             =   5280
       Width           =   735
    End
@@ -73,14 +81,14 @@ Begin VB.Form form_tex
       Caption         =   "docx2tex路径设置"
       Height          =   855
       Left            =   4680
-      TabIndex        =   34
+      TabIndex        =   33
       Top             =   240
       Width           =   4815
       Begin VB.CommandButton Command12 
          Caption         =   "选择"
          Height          =   495
          Left            =   4080
-         TabIndex        =   36
+         TabIndex        =   35
          Top             =   240
          Width           =   615
       End
@@ -89,7 +97,7 @@ Begin VB.Form form_tex
          Height          =   495
          Left            =   240
          MultiLine       =   -1  'True
-         TabIndex        =   35
+         TabIndex        =   34
          Text            =   "Form1.frx":016D
          Top             =   240
          Width           =   3735
@@ -99,7 +107,7 @@ Begin VB.Form form_tex
       Caption         =   "清空"
       Height          =   495
       Left            =   7920
-      TabIndex        =   33
+      TabIndex        =   32
       Top             =   2040
       Width           =   975
    End
@@ -107,7 +115,7 @@ Begin VB.Form form_tex
       Caption         =   "加$"
       Height          =   180
       Left            =   3960
-      TabIndex        =   32
+      TabIndex        =   31
       Top             =   360
       Width           =   615
    End
@@ -115,7 +123,7 @@ Begin VB.Form form_tex
       Caption         =   "加数学环境"
       Height          =   495
       Left            =   4920
-      TabIndex        =   31
+      TabIndex        =   30
       Top             =   2040
       Width           =   1335
    End
@@ -123,28 +131,9 @@ Begin VB.Form form_tex
       Caption         =   "复制"
       Height          =   495
       Left            =   6480
-      TabIndex        =   30
+      TabIndex        =   29
       Top             =   2040
       Width           =   1095
-   End
-   Begin VB.TextBox Text8 
-      BeginProperty Font 
-         Name            =   "宋体"
-         Size            =   14.25
-         Charset         =   134
-         Weight          =   400
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-      Height          =   5655
-      Left            =   6840
-      MultiLine       =   -1  'True
-      ScrollBars      =   2  'Vertical
-      TabIndex        =   29
-      Top             =   3120
-      Visible         =   0   'False
-      Width           =   4815
    End
    Begin VB.CommandButton Command7 
       Caption         =   "..."
@@ -493,7 +482,7 @@ Begin VB.Form form_tex
             EndProperty
             Height          =   375
             Left            =   960
-            TabIndex        =   39
+            TabIndex        =   38
             Top             =   870
             Width           =   2640
          End
@@ -511,7 +500,7 @@ Begin VB.Form form_tex
       Caption         =   "SourceDB.ini 路径"
       Height          =   1095
       Left            =   120
-      TabIndex        =   37
+      TabIndex        =   36
       Top             =   3840
       Width           =   4335
    End
@@ -617,6 +606,12 @@ Private Sub Command14_Click()
         replaceSymbolListFile = strFullName(0)
         Text10.Text = replaceSymbolListFile
     End If
+End Sub
+
+Private Sub Command15_Click()
+    texFlagLabel.Caption = "处理中……"
+    RichTextBox1.Text = JoinTest
+    texFlagLabel.Caption = "完成！"
 End Sub
 
 Private Sub Command2_Click()
