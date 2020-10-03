@@ -764,7 +764,7 @@ Private Sub Form_DblClick()
     'beforeChange
     'correcttest
     'MsgBox "questionID:" & questionID & " FigID:" & figID & " TabID:" & tabID
-    te
+    MsgBox addDollor(Chr(13) + Chr(13) + "start" + Chr(13))
     texFlagLabel.Caption = "Íê³É£¡"
 End Sub
 

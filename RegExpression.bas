@@ -726,6 +726,7 @@ Function changeToCmdXZ(ByRef strQuestionAndAnswer() As String, ByRef finalStr As
             For k = k To 4
                 finalStr = finalStr + Chr(13) + "{\color{red}选项未识别}"
             Next k
+            delEndEnter strAnswer
             finalStr = finalStr + Chr(13) + "{" + strAnswer + "}"
         Else
             strUnidentified = strUnidentified + str + Chr(13)
@@ -812,6 +813,7 @@ Function changeToCmdTK(ByRef strQuestionAndAnswer() As String, ByRef finalStr As
             If re.test(strAnswer) Then
                 strAnswer = re.Replace(strAnswer, Chr(13) + "\hh\color{blue}故答案")
             End If
+            delEndEnter strAnswer
             finalStr = finalStr + Chr(13) + "\itemT{" + returnID(questionID) + "}{" + strQuestion + "}" + Chr(13) + "{" + strAnswer + "}"
         Else
             strUnidentified = strUnidentified + str + Chr(13)
@@ -860,6 +862,7 @@ Function changeToCmdJD(ByRef strQuestionAndAnswer() As String, ByRef finalStr As
             '修正
             correct strAnswer
             lastReplace strAnswer
+            delEndEnter strAnswer
             finalStr = finalStr + Chr(13) + "\itemJ{" + returnID(questionID) + "}{" + strQuestion + "}" + Chr(13) + "{" + strAnswer + "}"
         Else
             strUnidentified = strUnidentified + str + Chr(13)
@@ -898,6 +901,7 @@ End Function
 Function insertDollerT(ByRef str As String)
     Dim re As Object
     Dim mMatches As Object      '匹配字符串集合对象
+    Dim eMatches As Object
     Dim strTemp As String
     Dim prev As Long
     
@@ -910,17 +914,75 @@ Function insertDollerT(ByRef str As String)
     If mMatches.Count > 0 Then
         For Each mMatch In mMatches
             strTemp = strTemp + Mid(str, prev, mMatch.FirstIndex + 1 - prev)
-            strTemp = strTemp + "$" + Mid(str, mMatch.FirstIndex + 1, mMatch.Length) + "$"
+            
+            strTemp = strTemp + addDollor(Mid(str, mMatch.FirstIndex + 1, mMatch.Length))
             prev = mMatch.FirstIndex + mMatch.Length + 1
             DoEvents
         Next
         strTemp = strTemp + Mid(str, prev)
-        re.Pattern = "\$(\n|\r)+\$"
-        strTemp = re.Replace(strTemp, "")
+        're.Pattern = "\$(\n|\r)+\$"
+        'strTemp = re.Replace(strTemp, "")
         str = strTemp
     End If
 End Function
 
+Function addDollor(ByVal str As String) As String
+    Dim re As Object
+    Dim eMatches As Object
+    Dim strTemp As String
+    Dim seFlag As Boolean, eeFlag As Boolean
+    
+    seFlag = False
+    eeFlag = False
+    prev = 1
+    Set re = New RegExp
+    re.Global = True
+    re.Pattern = "(\n|\r|" + Chr(13) + ")+" '加数学环境
+    
+    'str = Chr(13) + "math" + Chr(13) + Chr(13)
+    str = Trim(str)
+    Set eMatches = re.Execute(str)
+    If eMatches.Count = 0 Then
+        '无回车
+    ElseIf eMatches.Count = 1 Then
+        If eMatches(0).Length <> Len(str) Then
+            If eMatches(0).FirstIndex = 0 Then
+                '回车开头
+                seFlag = True
+            ElseIf Len(str) = eMatches(0).FirstIndex + eMatches(0).Length Then
+                '回车结尾
+                eeFlag = True
+            End If
+        Else
+            '只有回车
+            Exit Function
+        End If
+    Else
+        '多个回车
+        If eMatches(0).FirstIndex = 0 Then
+            '回车开头
+            seFlag = True
+        End If
+        If Len(str) = eMatches(eMatches.Count - 1).FirstIndex + eMatches(eMatches.Count - 1).Length Then
+            '回车结尾
+            eeFlag = True
+        End If
+    End If
+    If seFlag And eeFlag Then
+        '头尾都有回车
+        strTemp = Chr(13) + "$" + Mid(str, eMatches(0).Length + 1, eMatches(eMatches.Count - 1).FirstIndex - eMatches(0).Length) + "$" + Chr(13)
+    ElseIf seFlag Then
+        '头回车
+        strTemp = Chr(13) + "$" + Right(str, Len(str) - eMatches(0).Length) + "$"
+    ElseIf eeFlag Then
+        '尾回车
+        strTemp = "$" + Left(str, eMatches(eMatches.Count - 1).FirstIndex) + "$" + Chr(13)
+    Else
+        '头尾无回车
+        strTemp = "$" + str + "$"
+    End If
+    addDollor = strTemp
+End Function
 Function correct(ByRef str As String)
     correctAlign str
     correctArray str
@@ -1428,25 +1490,6 @@ Function adjustDoller(ByRef str As String, strPattern As String)
     
     re.Pattern = strPattern
 
-    Set mMatches = re.Execute(str)
-    If mMatches.Count > 0 Then
-        For Each mMatch In mMatches
-            strTemp = mMatch.Value
-            tempXiuZheng = tempXiuZheng + Mid(str, prev, mMatch.FirstIndex - prev + 1)
-            If Left(strTemp, 1) = "$" And Right(strTemp, 1) = "$" Then
-                tempXiuZheng = tempXiuZheng + Chr(13)
-            ElseIf Left(strTemp, 1) = "$" And Asc(Right(strTemp, 1)) > 0 Then
-                tempXiuZheng = tempXiuZheng + Chr(13) + "$" + Right(strTemp, 1)
-            ElseIf Right(strTemp, 1) = "$" And Asc(Left(strTemp, 1)) > 0 Then
-                tempXiuZheng = tempXiuZheng + Left(strTemp, 1) + "$" + Chr(13)
-            Else
-                tempXiuZheng = tempXiuZheng + strTemp
-            End If
-            prev = mMatch.FirstIndex + mMatch.Length + 1
-        Next
-        tempXiuZheng = tempXiuZheng + Mid(str, prev)
-        str = tempXiuZheng
-    End If
     re.Pattern = "\$ +\$"
     str = re.Replace(str, "")
     re.Pattern = "\$\$"
