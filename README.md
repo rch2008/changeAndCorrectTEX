@@ -1,4 +1,4 @@
-# git-learning
+# tex修正，试题分割
 docx转换LaTeX，修正，分割工具
 
 使用docx2tex进行转换 https://github.com/transpect/docx2tex
@@ -34,3 +34,10 @@ win7/win8/win10问题所在：
 2020-08-31  包含以下更改
 1. 选择题选项分割
 2. 待续
+
+2020-10-05
+
+增加学生版试题答案拼接为教师版
+试题答案分界为“\n参考答案”
+
+单击join拼接结果查看，Ctrl+Join对刚查看的文件进行拼接
