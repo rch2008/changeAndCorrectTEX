@@ -2,6 +2,7 @@ Attribute VB_Name = "RegExpression"
 Private Declare Function OpenProcess Lib "kernel32" (ByVal dwDesiredAccess As Long, ByVal bInheritHandle As Long, ByVal dwProcessId As Long) As Long
 Private Declare Function CloseHandle Lib "kernel32" (ByVal hObject As Long) As Long
 Private Declare Function WaitForSingleObject Lib "kernel32" (ByVal hHandle As Long, ByVal dwMilliseconds As Long) As Long
+Public Declare Function GetKeyState Lib "user32" (ByVal nVirtKey As Long) As Integer
 
 Public questionID As Long
 Public tabID As Long
@@ -170,7 +171,7 @@ Function Main()
     End If
 End Function
 
-Function JoinTest() As String
+Function JoinTest(Optional joinFlag As Boolean = False) As String
     Dim doc As String
     Dim str As String
     Dim arr() As String
@@ -179,7 +180,7 @@ Function JoinTest() As String
     Dim texFileName
     allFilesName = ""
     strUnidentified = ""
-    If fileSelect = False Then
+    If fileSelect = False And joinFlag = False Then
         strFullName = selectFile(1)
     End If
     If strFullName(0) <> "" Then
@@ -189,15 +190,17 @@ Function JoinTest() As String
             cutDocument doc        '去头尾，去双换行，删除带括号命令
             replaceSymbol doc, texFileName       '替换，删除一些符号
             correctUDscript doc    '双上下标
-            joinXTJ doc, finalStr, texFileName
+            joinXTJ doc, finalStr, texFileName, joinFlag
             arr = Split(texFileName, ".")
-            writeTex finalStr, Left(texFileName, Len(texFileName) - Len(arr(UBound(arr))) - 1) + "_Join.tex"
+            If joinFlag Then
+                writeTex finalStr, Left(texFileName, Len(texFileName) - Len(arr(UBound(arr))) - 1) + "_Join.tex"
+            End If
         Next
     End If
     JoinTest = finalStr
 End Function
 
-Function joinXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileName As String)
+Function joinXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileName As String, joinFlag As Boolean)
     Dim re As Object
     Dim mMatches As Object      '匹配字符串集合对象
     Dim strTemp, str As String
@@ -209,6 +212,13 @@ Function joinXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileNam
     Dim docQuestion As String
     Dim arrAnswer() As String
     Dim index As Long
+    Dim jFlag As String
+    
+    If joinFlag Then
+        jFlag = "Not empty"
+    Else
+        jFlag = ""
+    End If
     
     Set re = New RegExp
     strXZ = ""
@@ -221,10 +231,10 @@ Function joinXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileNam
     doc = re.Replace(doc, Chr(0))
     t = Split(doc, Chr(0))
     docQuestion = t(0)
-    arrAnswer = cutApart(t(1), "")
+    arrAnswer = cutApart(t(1), jFlag)
     index = 1
     
-    re.Pattern = "(\n|\r|" + Chr(13) + ")" + "\S{0,2}(选择|填空|解答|多选|单选)题"
+    re.Pattern = "(\n|\r|" + Chr(13) + ")" + "\S{0,2}(选择|填空|双空|解答|多选|单选)题"
 
     If re.test(docQuestion) Then
         firstQuestionFlag = True
@@ -238,21 +248,21 @@ Function joinXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileNam
                 Else
                     strXZ = Mid(docQuestion, mMatches(i).FirstIndex + 1)
                 End If
-                joinQA cutApart(strXZ, ""), finalStr, arrAnswer, index
-            ElseIf InStr(strTemp, "填空") > 0 Then
+                joinQA cutApart(strXZ, ""), finalStr, arrAnswer, index, joinFlag
+            ElseIf InStr(strTemp, "填空") > 0 Or InStr(strTemp, "双空") > 0 Then
                 If i + 1 < mMatches.Count Then
                     strTK = Mid(docQuestion, mMatches(i).FirstIndex + 1, mMatches(i + 1).FirstIndex - mMatches(i).FirstIndex)
                 Else
                     strTK = Mid(docQuestion, mMatches(i).FirstIndex + 1)
                 End If
-                joinQA cutApart(strTK, ""), finalStr, arrAnswer, index
+                joinQA cutApart(strTK, ""), finalStr, arrAnswer, index, joinFlag
             ElseIf InStr(strTemp, "解答") > 0 Then
                 If i + 1 < mMatches.Count Then
                     strJD = Mid(docQuestion, mMatches(i).FirstIndex + 1, mMatches(i + 1).FirstIndex - mMatches(i).FirstIndex)
                 Else
                     strJD = Mid(docQuestion, mMatches(i).FirstIndex + 1)
                 End If
-                joinQA cutApart(strJD, ""), finalStr, arrAnswer, index
+                joinQA cutApart(strJD, ""), finalStr, arrAnswer, index, joinFlag
             End If
             DoEvents
         Next i
@@ -262,11 +272,16 @@ Function joinXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileNam
     End If
 End Function
 
-Function joinQA(ByRef strQuestionAndAnswer() As String, ByRef finalStr As String, ByRef strAnswer() As String, ByRef index As Long)
-
+Function joinQA(ByRef strQuestionAndAnswer() As String, ByRef finalStr As String, ByRef strAnswer() As String, ByRef index As Long, Optional joinFlag As Boolean = False)
+    Dim jx As String
+    If joinFlag Then
+        jx = "【解析】"
+    Else
+        jx = ""
+    End If
     finalStr = finalStr + strQuestionAndAnswer(0)
     For i = 1 To UBound(strQuestionAndAnswer)
-        finalStr = finalStr + Chr(13) + strQuestionAndAnswer(i) + Chr(13) + strAnswer(index)
+        finalStr = finalStr + Chr(13) + strQuestionAndAnswer(i) + Chr(13) + jx + strAnswer(index)
         index = index + 1
     Next
 

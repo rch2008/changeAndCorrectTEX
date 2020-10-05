@@ -17,10 +17,10 @@ Begin VB.Form form_tex
    Begin VB.CommandButton Command15 
       Caption         =   "Join"
       Height          =   495
-      Left            =   9000
+      Left            =   8880
       TabIndex        =   43
       Top             =   2040
-      Width           =   495
+      Width           =   615
    End
    Begin VB.Frame Frame8 
       Caption         =   "首次修正字符列表"
@@ -106,7 +106,7 @@ Begin VB.Form form_tex
    Begin VB.CommandButton Command11 
       Caption         =   "清空"
       Height          =   495
-      Left            =   7920
+      Left            =   7800
       TabIndex        =   32
       Top             =   2040
       Width           =   975
@@ -518,7 +518,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-
+Private Ctrl
 Private Sub Check1_Click()
     If Check1.Value = 0 Then
         ifReadINI = True
@@ -610,7 +610,14 @@ End Sub
 
 Private Sub Command15_Click()
     texFlagLabel.Caption = "处理中……"
-    RichTextBox1.Text = JoinTest
+    Ctrl = GetKeyState(vbKeyControl)
+    If Ctrl < 0 Then
+        'MsgBox "Ctrl+单击"
+        RichTextBox1.Text = JoinTest(True)
+    Else
+        'MsgBox "单击"
+        RichTextBox1.Text = JoinTest
+    End If
     texFlagLabel.Caption = "完成！"
 End Sub
 
