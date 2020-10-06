@@ -15,6 +15,7 @@ Public strTestName As String
 Public replaceListFile As String
 Public replaceSymbolListFile As String
 Public braceCMDList As String
+Public correctEnvironments() As String
 Public docxToTexPath As String
 Public addDollorFlag As Boolean
 Public correctLeftRightFlag As Boolean
@@ -655,7 +656,7 @@ Function cutXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileName
         Next i
     Else
         insertDollerT doc
-        correctCases doc
+        correctEnvs doc
         correctFig doc, False
         correctTabular doc, False
         correctMathScript doc, "_\{"
@@ -721,12 +722,12 @@ Function changeToCmdXZ(ByRef strQuestionAndAnswer() As String, ByRef finalStr As
             
             strQuestion = splitXX(strTemp)
             ''''''''''''''''''''''''''''''''''''''''''''''''''''
-            ''delEndEnter strQuestion(UBound(strQuestion))
+            ''TrimEnter strQuestion(UBound(strQuestion))
             For j = 0 To UBound(strQuestion)
-                delEndEnter strQuestion(j)
                 insertDollerT strQuestion(j)
                 '修正
                 correct strQuestion(j)
+                strQuestion(j) = TrimEnter(strQuestion(j))
             Next j
             insertDollerT strAnswer
             re.Pattern = "故选"
@@ -741,7 +742,7 @@ Function changeToCmdXZ(ByRef strQuestionAndAnswer() As String, ByRef finalStr As
             For k = k To 4
                 finalStr = finalStr + Chr(13) + "{\color{red}选项未识别}"
             Next k
-            delEndEnter strAnswer
+            strAnswer = TrimEnter(strAnswer)
             finalStr = finalStr + Chr(13) + "{" + strAnswer + "}"
         Else
             strUnidentified = strUnidentified + str + Chr(13)
@@ -819,7 +820,7 @@ Function changeToCmdTK(ByRef strQuestionAndAnswer() As String, ByRef finalStr As
             insertDollerT strQuestion
             '修正
             correct strQuestion
-            
+            strQuestion = TrimEnter(strQuestion)
             insertDollerT strAnswer
             '修正
             correct strAnswer
@@ -828,7 +829,7 @@ Function changeToCmdTK(ByRef strQuestionAndAnswer() As String, ByRef finalStr As
             If re.test(strAnswer) Then
                 strAnswer = re.Replace(strAnswer, Chr(13) + "\hh\color{blue}故答案")
             End If
-            delEndEnter strAnswer
+            strAnswer = TrimEnter(strAnswer)
             finalStr = finalStr + Chr(13) + "\itemT{" + returnID(questionID) + "}{" + strQuestion + "}" + Chr(13) + "{" + strAnswer + "}"
         Else
             strUnidentified = strUnidentified + str + Chr(13)
@@ -877,7 +878,7 @@ Function changeToCmdJD(ByRef strQuestionAndAnswer() As String, ByRef finalStr As
             '修正
             correct strAnswer
             lastReplace strAnswer
-            delEndEnter strAnswer
+            strAnswer = TrimEnter(strAnswer)
             finalStr = finalStr + Chr(13) + "\itemJ{" + returnID(questionID) + "}{" + strQuestion + "}" + Chr(13) + "{" + strAnswer + "}"
         Else
             strUnidentified = strUnidentified + str + Chr(13)
@@ -900,6 +901,7 @@ Function questionList(ByRef strQuestion As String)
         For i = 0 To UBound(str)
             insertDollerT str(i)
             correct str(i)
+            str(i) = TrimEnter(str(i))
         Next
         strQuestion = str(0) + Chr(13) + "\begin{questionList}"    'questionList
         For i = 1 To UBound(str)
@@ -923,7 +925,7 @@ Function insertDollerT(ByRef str As String)
     prev = 1
     Set re = New RegExp
     re.Global = True
-    re.Pattern = "([a-zA-Z0-9\^\\_\*\+-=<>\(\)\[\]\{\}\|/ %" + Chr(39) + "\n\r])+" '加数学环境
+    re.Pattern = "([a-zA-Z0-9\^\\_\*\+-=<>\(\)\[\]\{\}\|/ %" + Chr(39) + "])+" '\n\r加数学环境
     
     Set mMatches = re.Execute(str)
     If mMatches.Count > 0 Then
@@ -998,10 +1000,85 @@ Function addDollor(ByVal str As String) As String
     End If
     addDollor = strTemp
 End Function
+
+Function TrimEnter(ByVal str As String, Optional LR As String = "") As String
+    Dim re As Object
+    Dim eMatches As Object
+    Dim strTemp As String
+    Dim seFlag As Boolean, eeFlag As Boolean
+    
+    seFlag = False
+    eeFlag = False
+    prev = 1
+    Set re = New RegExp
+    re.Global = True
+    re.Pattern = "(\n|\r|" + Chr(13) + ")+" '加数学环境
+    
+    'str = Chr(13) + "math" + Chr(13) + Chr(13)
+    Set eMatches = re.Execute(str)
+    If eMatches.Count = 0 Then
+        '无回车
+        TrimEnter = str
+        Exit Function
+    ElseIf eMatches.Count = 1 Then
+        If eMatches(0).Length <> Len(str) Then
+            If eMatches(0).FirstIndex = 0 Then
+                '回车开头
+                seFlag = True
+            ElseIf Len(str) = eMatches(0).FirstIndex + eMatches(0).Length Then
+                '回车结尾
+                eeFlag = True
+            End If
+        Else
+            '只有回车
+            Exit Function
+        End If
+    Else
+        '多个回车
+        If eMatches(0).FirstIndex = 0 Then
+            '回车开头
+            seFlag = True
+        End If
+        If Len(str) = eMatches(eMatches.Count - 1).FirstIndex + eMatches(eMatches.Count - 1).Length Then
+            '回车结尾
+            eeFlag = True
+        End If
+    End If
+    
+    If seFlag And eeFlag Then
+        '头尾都有回车
+        If LR = "" Then
+            strTemp = Mid(str, eMatches(0).Length + 1, eMatches(eMatches.Count - 1).FirstIndex - eMatches(0).Length)
+        ElseIf UCase(LR) = "L" Then
+            strTemp = Right(str, Len(str) - eMatches(0).Length)
+        ElseIf UCase(LR) = "R" Then
+            strTemp = Left(str, eMatches(eMatches.Count - 1).FirstIndex)
+        End If
+    ElseIf seFlag Then
+        '头回车
+        If LR = "" Or UCase(LR) = "L" Then
+            strTemp = Right(str, Len(str) - eMatches(0).Length)
+        Else
+            strTemp = str
+        End If
+    ElseIf eeFlag Then
+        '尾回车
+        If LR = "" Or UCase(LR) = "R" Then
+            strTemp = Left(str, eMatches(eMatches.Count - 1).FirstIndex)
+        Else
+            strTemp = str
+        End If
+    Else
+        strTemp = str
+    End If
+    TrimEnter = strTemp
+End Function
+
 Function correct(ByRef str As String)
     correctAlign str
     correctArray str
-    correctCases str
+    'correctCases str
+    correctEnvs str
     correctFig str
     correctTabular str
     correctMathScript str, "_\{"
@@ -1174,8 +1251,14 @@ Function matchendarray(ByRef str As String) As Boolean
     End If
     str = tempXiuZheng
 End Function
-
-Function correctCases(ByRef str As String)
+Function correctEnvs(ByRef str As String)
+    If correctEnvironments(0) <> "" Then
+        For Each env In correctEnvironments
+            correctEnv str, CStr(env)
+        Next
+    End If
+End Function
+Function correctEnv(ByRef str As String, env As String)
     Dim re As Object
     Dim mMatches As Object      '匹配字符串集合对象
     Dim mMatch As Object        '匹配字符串
@@ -1188,7 +1271,7 @@ Function correctCases(ByRef str As String)
     re.Global = True
     prev = 1
     
-    re.Pattern = "(\\begin\{cases\})|(\\end\{cases\})"
+    re.Pattern = "(\\begin\{" + env + "\})|(\\end\{" + env + "\})"
     Set mMatches = re.Execute(str)
     If mMatches.Count > 0 Then
         For n = 0 To mMatches.Count - 1 Step 2
@@ -1204,7 +1287,7 @@ Function correctCases(ByRef str As String)
             If re.test(strTemp) Then
                 strTemp = re.Replace(strTemp, ",")
             End If
-            tempXiuZheng = tempXiuZheng + "\begin{cases}" + strTemp + "\end{cases}"
+            tempXiuZheng = tempXiuZheng + "\begin{" + env + "}" + strTemp + "\end{" + env + "}"
             prev = mMatches(n + 1).FirstIndex + mMatches(n + 1).Length + 1
             DoEvents
         Next n
@@ -1443,17 +1526,6 @@ Function readAcmd(ByVal coordinate As Long, ByVal str As String, ByRef strCMD As
         End If
     Loop While True
 End Function
-Function delEndEnter(ByRef str As String)
-    Dim i As Long
-    Dim c As String
-    i = Len(str)
-    c = Mid(str, i, 1)
-    Do While c = Chr(13)
-        i = i - 1
-        c = Mid(str, i, 1)
-    Loop
-    str = Mid(str, 1, i)
-End Function
 
 Function delDoller(ByRef str As String, strPattern As String)
     Dim re As Object
@@ -1509,8 +1581,8 @@ Function adjustDoller(ByRef str As String, strPattern As String)
     str = re.Replace(str, "")
     re.Pattern = "\$\$"
     str = re.Replace(str, "")
-    re.Pattern = "\$" + Chr(13) + "\$"
-    str = re.Replace(str, Chr(13))
+    're.Pattern = "\$" + Chr(13) + "\$"
+    'str = re.Replace(str, Chr(13))
     re.Pattern = Chr(13) + "\$\\\\\\FigMinipage"
     str = re.Replace(str, "$" + Chr(13) + "\\\FigMinipage")
     re.Pattern = Chr(13) + "\$\\item"
@@ -2034,19 +2106,19 @@ Function correctAlign(ByRef str As String)
             If re.test(strTemp) Then
                 strTemp = re.Replace(strTemp, "")
             End If
-            re.Pattern = "\{array\}"
-            If re.test(strTemp) = False Then
-                re.Pattern = "\\\\"
-                If re.test(strTemp) Then
-                    strTemp = re.Replace(strTemp, "$" & Chr(13) & "$")
-                End If
-            End If
+            're.Pattern = "\{array\}"
+            'If re.test(strTemp) = False Then
+            '    re.Pattern = "\\\\"
+            '    If re.test(strTemp) Then
+            '        strTemp = re.Replace(strTemp, "$" & Chr(13) & "$")
+            '    End If
+            'End If
 
             're.Pattern = "，"
             'If re.test(strTemp) Then
             '    strTemp = re.Replace(strTemp, ",")
             'End If
-            tempXiuZheng = tempXiuZheng + strTemp
+            tempXiuZheng = tempXiuZheng + TrimEnter(strTemp)
             prev = mMatches(n + 1).FirstIndex + mMatches(n + 1).Length + 1
             DoEvents
         Next n

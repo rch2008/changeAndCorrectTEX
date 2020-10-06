@@ -771,7 +771,7 @@ Private Sub Form_DblClick()
     'beforeChange
     'correcttest
     'MsgBox "questionID:" & questionID & " FigID:" & figID & " TabID:" & tabID
-    MsgBox addDollor(Chr(13) + Chr(13) + "start" + Chr(13))
+    MsgBox "$" & TrimEnter(Chr(13) + Chr(13) + "start" + Chr(13), "R") & "$"
     texFlagLabel.Caption = "Íê³É£¡"
 End Sub
 
@@ -874,6 +874,13 @@ Function readAppIni()
         braceCMDList = str
     Else
         braceCMDList = "" '"\\textbf\{|\\text\{|\\textit\{|\\mathrm\{|\\boldsymbol\{|\\textcolor\{color-[0-9]\}\{|\\underline\{"
+    End If
+    
+    str = GetAppINI("fullFileName", "correctEnvironments")
+    If str <> "" Then
+        correctEnvironments = Split(str, ",")
+    Else
+        braceCMDList = ""
     End If
 End Function
 
