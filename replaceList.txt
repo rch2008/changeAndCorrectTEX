@@ -15,6 +15,7 @@
 {\div};\div 
 \bot;\perp 
 {\bot};\perp 
+{\perp};\perp 
 {\pm};\pm 
 {\angle};\angle 
 {\neq};\neq 
@@ -28,5 +29,6 @@
 {\ldots};\ldots 
 {\forall};\forall 
 {\exists};\exists 
+{\Rightarrow};\Rightarrow 
 #\\tk(?!\w);\tk 
 # {2,}; 

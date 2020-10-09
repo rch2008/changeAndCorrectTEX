@@ -695,6 +695,29 @@ Function cutApart(ByRef strQuestionAndAnswer As String, strType As String) As St
     End If
 End Function
 
+Function CutAnswer(ByVal strAnswer As String) As String
+    Dim re As Object
+    Dim mMatches As Object      '匹配字符串集合对象
+    Dim strTemp As String
+    Set re = New RegExp
+    re.Global = True
+    re.Pattern = "[\n\r" + Chr(13) + "][【]?解析[】]?"
+    Set mMatches = re.Execute(strAnswer)
+    If mMatches.Count = 1 Then
+        strTemp = Left(strAnswer, mMatches(0).FirstIndex)
+    End If
+    re.Pattern = "[\n\r" + Chr(13) + "][【]?详解[】]?"
+    Set mMatches = re.Execute(strAnswer)
+    If mMatches.Count = 1 Then
+        strAnswer = Mid(strAnswer, mMatches(0).FirstIndex + mMatches(0).Length + 1)
+    End If
+    re.Pattern = "[\n\r" + Chr(13) + "][【]?点睛[】]?"
+    Set mMatches = re.Execute(strAnswer)
+    If mMatches.Count = 1 Then
+        strAnswer = Left(strAnswer, mMatches(0).FirstIndex)
+    End If
+    CutAnswer = strTemp + strAnswer
+End Function
 Function changeToCmdXZ(ByRef strQuestionAndAnswer() As String, ByRef finalStr As String)
     Dim strQuestion() As String
     Dim strAnswer As String
@@ -717,7 +740,8 @@ Function changeToCmdXZ(ByRef strQuestionAndAnswer() As String, ByRef finalStr As
         If re.test(str) = True Then
             Set mMatches = re.Execute(str)
             strTemp = Mid(str, 1, mMatches(0).FirstIndex)
-            strAnswer = Mid(str, mMatches(0).FirstIndex + mMatches(0).Length + 1)
+            '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+            strAnswer = CutAnswer(Mid(str, mMatches(0).FirstIndex + mMatches(0).Length + 1))
             
             
             strQuestion = splitXX(strTemp)
@@ -815,7 +839,7 @@ Function changeToCmdTK(ByRef strQuestionAndAnswer() As String, ByRef finalStr As
         If re.test(str) = True Then
             Set mMatches = re.Execute(str)
             strQuestion = Mid(str, 1, mMatches(0).FirstIndex)
-            strAnswer = Mid(str, mMatches(0).FirstIndex + mMatches(0).Length + 1)
+            strAnswer = CutAnswer(Mid(str, mMatches(0).FirstIndex + mMatches(0).Length + 1))
             
             insertDollerT strQuestion
             '修正
@@ -862,7 +886,7 @@ Function changeToCmdJD(ByRef strQuestionAndAnswer() As String, ByRef finalStr As
         If re.test(str) = True Then
             Set mMatches = re.Execute(str)
             strQuestion = Mid(str, 1, mMatches(0).FirstIndex)
-            strAnswer = Mid(str, mMatches(0).FirstIndex + mMatches(0).Length + 1)
+            strAnswer = CutAnswer(Mid(str, mMatches(0).FirstIndex + mMatches(0).Length + 1))
         
             questionList strQuestion
             
@@ -932,7 +956,7 @@ Function insertDollerT(ByRef str As String)
         For Each mMatch In mMatches
             strTemp = strTemp + Mid(str, prev, mMatch.FirstIndex + 1 - prev)
             
-            strTemp = strTemp + addDollor(Mid(str, mMatch.FirstIndex + 1, mMatch.Length))
+            strTemp = strTemp & "$" & Mid(str, mMatch.FirstIndex + 1, mMatch.Length) & "$" 'addDollor(Mid(str, mMatch.FirstIndex + 1, mMatch.Length))
             prev = mMatch.FirstIndex + mMatch.Length + 1
             DoEvents
         Next

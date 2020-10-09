@@ -578,7 +578,8 @@ Private Sub Command10_Click()
         str = delLeftRight(str)
         correctLeftRight str
     End If
-
+    readReplaceList
+    replaceList str
     RichTextBox1.Text = str
 End Sub
 
