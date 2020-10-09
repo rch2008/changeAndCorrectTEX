@@ -578,6 +578,11 @@ Private Sub Command10_Click()
         str = delLeftRight(str)
         correctLeftRight str
     End If
+        correctEnvs str
+        correctMathScript str, "_\{"
+        correctMathScript str, "\\dfrac\{", 2
+        str = delLeftRight(str)
+        correctLeftRight str
     readReplaceList
     replaceList str
     RichTextBox1.Text = str

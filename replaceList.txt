@@ -30,5 +30,7 @@
 {\forall};\forall 
 {\exists};\exists 
 {\Rightarrow};\Rightarrow 
+{\rightarrow};\rightarrow 
+{\infty};\infty 
 #\\tk(?!\w);\tk 
 # {2,}; 
