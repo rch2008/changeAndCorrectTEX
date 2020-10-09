@@ -7,14 +7,6 @@ CopyAndDel.bat和convert.bat要放在docx2tex目录中
 
 使用https://github.com/Kr00l/VBCCR 项目中的RichTextBox，VBCCR16.OCX可能需要自己注册。
 
-docx转换LaTeX，修正，分割工具
-
-使用docx2tex进行转换 https://github.com/transpect/docx2tex
-
-CopyAndDel.bat和convert.bat要放在docx2tex目录中
-
-使用https://github.com/Kr00l/VBCCR 项目中的RichTextBox，VBCCR16.OCX可能需要自己注册。
-
 win7/win8/win10问题所在：
 
  64位系统一般都是可以安装32位程序的，只是需要执行 C:\Windows\SysWOW64\regsvr32.exe；
@@ -41,3 +33,8 @@ win7/win8/win10问题所在：
 试题答案分界为“\n参考答案”
 
 单击join拼接结果查看，Ctrl+Join对刚查看的文件进行拼接
+
+2020-10-09
+
+增加答案自动去除分析、点睛等，修复小bug
+
