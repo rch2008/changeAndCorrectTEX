@@ -636,7 +636,7 @@ Function cutXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileName
                     strXZ = Mid(doc, mMatches(i).FirstIndex + 1)
                 End If
                 changeToCmdXZ cutApart(strXZ, CStr(strTemp)), finalStr
-            ElseIf InStr(strTemp, "МоїХ") > 0 Then
+            ElseIf InStr(strTemp, "МоїХ") > 0 Or InStr(strTemp, "Л«їХ") > 0 Then
                 If i + 1 < mMatches.Count Then
                     strTK = Mid(doc, mMatches(i).FirstIndex + 1, mMatches(i + 1).FirstIndex - mMatches(i).FirstIndex)
                 Else
