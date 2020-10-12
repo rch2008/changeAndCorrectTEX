@@ -882,11 +882,65 @@ Function readAppIni()
         braceCMDList = "" '"\\textbf\{|\\text\{|\\textit\{|\\mathrm\{|\\boldsymbol\{|\\textcolor\{color-[0-9]\}\{|\\underline\{"
     End If
     
+    str = GetAppINI("fullFileName", "questionTypeXZ")
+    str = Replace(str, Chr(0), "")
+    If str <> "" Then
+        questionTypeXZ = str
+    Else
+        questionTypeXZ = "选择题"
+    End If
+    
+    str = GetAppINI("fullFileName", "questionTypeTK")
+    str = Replace(str, Chr(0), "")
+    If str <> "" Then
+        questionTypeTK = str
+    Else
+        questionTypeTK = "填空题"
+    End If
+    
+    str = GetAppINI("fullFileName", "questionTypeJD")
+    str = Replace(str, Chr(0), "")
+    If str <> "" Then
+        questionTypeJD = str
+    Else
+        questionTypeJD = "解答题"
+    End If
+    
+    str = GetAppINI("fullFileName", "questionAnswerBoundary")
+    str = Replace(str, Chr(0), "")
+    If str <> "" Then
+        questionAnswerBoundary = str
+    Else
+        questionAnswerBoundary = "【解析】"
+    End If
+    
+    str = GetAppINI("fullFileName", "answerBoundary")
+    str = Replace(str, Chr(0), "")
+    If str <> "" Then
+        answerBoundary = str
+    Else
+        answerBoundary = "参考答案"
+    End If
+    
     str = GetAppINI("fullFileName", "correctEnvironments")
     If str <> "" Then
         correctEnvironments = Split(str, ",")
     Else
-        braceCMDList = ""
+        correctEnvironments = Split("", ",")
+    End If
+    
+    str = GetAppINI("fullFileName", "delDoller")
+    If str <> "" Then
+        delDollerList = Split(str, ",")
+    Else
+        delDollerList = Split("", ",")
+    End If
+    
+    str = GetAppINI("fullFileName", "correctMathScript")
+    If str <> "" Then
+        mathScriptList = Split(str, ",")
+    Else
+        mathScriptList = Split("", ",")
     End If
 End Function
 

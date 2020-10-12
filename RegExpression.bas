@@ -15,7 +15,15 @@ Public strTestName As String
 Public replaceListFile As String
 Public replaceSymbolListFile As String
 Public braceCMDList As String
+Public questionTypeXZ As String
+Public questionTypeTK As String
+Public questionTypeJD As String
+Public answerBoundary As String
+Public questionAnswerBoundary As String
 Public correctEnvironments() As String
+Public mathScriptList() As String
+Public delDollerList() As String
+
 Public docxToTexPath As String
 Public addDollorFlag As Boolean
 Public correctLeftRightFlag As Boolean
@@ -228,14 +236,14 @@ Function joinXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileNam
     
     re.Global = True
     
-    re.Pattern = "(\n|\r|" + Chr(13) + ")" + "参考答案"
+    re.Pattern = "(\n|\r|" + Chr(13) + ")" + answerBoundary
     doc = re.Replace(doc, Chr(0))
     t = Split(doc, Chr(0))
     docQuestion = t(0)
     arrAnswer = cutApart(t(1), jFlag)
     index = 1
     
-    re.Pattern = "(\n|\r|" + Chr(13) + ")" + "\S{0,2}(选择|填空|双空|解答|多选|单选)题"
+    re.Pattern = "(\n|\r|" + Chr(13) + ")" + "\S{0,2}(" + questionTypeXZ + "|" + questionTypeTK + "|" + questionTypeJD + ")"
 
     If re.test(docQuestion) Then
         firstQuestionFlag = True
@@ -243,21 +251,24 @@ Function joinXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileNam
         strTestName = Mid(docQuestion, 1, mMatches(0).FirstIndex)
         For i = 0 To mMatches.Count - 1
             strTemp = mMatches(i).Value
-            If InStr(strTemp, "选择") > 0 Or InStr(strTemp, "多选") > 0 Or InStr(strTemp, "单选") > 0 Then
+            If QuestionType(strTemp, questionTypeXZ) = True Then
+            '选择题
                 If i + 1 < mMatches.Count Then
                     strXZ = Mid(docQuestion, mMatches(i).FirstIndex + 1, mMatches(i + 1).FirstIndex - mMatches(i).FirstIndex)
                 Else
                     strXZ = Mid(docQuestion, mMatches(i).FirstIndex + 1)
                 End If
                 joinQA cutApart(strXZ, ""), finalStr, arrAnswer, index, joinFlag
-            ElseIf InStr(strTemp, "填空") > 0 Or InStr(strTemp, "双空") > 0 Then
+            ElseIf QuestionType(strTemp, questionTypeTK) = True Then
+            '填空题
                 If i + 1 < mMatches.Count Then
                     strTK = Mid(docQuestion, mMatches(i).FirstIndex + 1, mMatches(i + 1).FirstIndex - mMatches(i).FirstIndex)
                 Else
                     strTK = Mid(docQuestion, mMatches(i).FirstIndex + 1)
                 End If
                 joinQA cutApart(strTK, ""), finalStr, arrAnswer, index, joinFlag
-            ElseIf InStr(strTemp, "解答") > 0 Then
+            ElseIf QuestionType(strTemp, questionTypeJD) = True Then
+                '解答题
                 If i + 1 < mMatches.Count Then
                     strJD = Mid(docQuestion, mMatches(i).FirstIndex + 1, mMatches(i + 1).FirstIndex - mMatches(i).FirstIndex)
                 Else
@@ -273,10 +284,25 @@ Function joinXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileNam
     End If
 End Function
 
+Function QuestionType(ByVal str As String, ByVal strPattern As String) As Boolean
+    Dim re As Object
+    Dim mMatches As Object      '匹配字符串集合对象
+    Set re = New RegExp
+    re.Pattern = strPattern
+    Set mMatches = re.Execute(TrimEnter(str))
+    If mMatches.Count > 0 Then
+        If mMatches(0).FirstIndex < 3 Then
+            QuestionType = True
+            Exit Function
+        End If
+    Else
+        QuestionType = False
+    End If
+End Function
 Function joinQA(ByRef strQuestionAndAnswer() As String, ByRef finalStr As String, ByRef strAnswer() As String, ByRef index As Long, Optional joinFlag As Boolean = False)
     Dim jx As String
     If joinFlag Then
-        jx = "【解析】"
+        jx = questionAnswerBoundary
     Else
         jx = ""
     End If
@@ -355,8 +381,6 @@ Function cutDocument(ByRef str As String) As String
         s = re.Replace(s, Chr(13))
         re.Pattern = "声明：(.)+25151492"
         s = re.Replace(s, "")
-        're.Pattern = "参考答案与试题解析"
-        's = re.Replace(s, "")
     Else
         MsgBox "document环境不匹配！"
     End If
@@ -621,7 +645,7 @@ Function cutXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileName
     strJD = ""
     
     re.Global = True
-    re.Pattern = "(\n|\r|" + Chr(13) + ")" + "\S{0,2}(选择|填空|双空|解答|多选|单选)题"
+    re.Pattern = "(\n|\r|" + Chr(13) + ")" + "\S{0,2}(" + questionTypeXZ + "|" + questionTypeTK + "|" + questionTypeJD + ")"
 
     If re.test(doc) Then
         firstQuestionFlag = True
@@ -629,14 +653,16 @@ Function cutXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileName
         strTestName = Mid(doc, 1, mMatches(0).FirstIndex)
         For i = 0 To mMatches.Count - 1
             strTemp = mMatches(i).Value
-            If InStr(strTemp, "选择") > 0 Or InStr(strTemp, "多选") > 0 Or InStr(strTemp, "单选") > 0 Then
+            If QuestionType(strTemp, questionTypeXZ) = True Then
+                '选择题
                 If i + 1 < mMatches.Count Then
                     strXZ = Mid(doc, mMatches(i).FirstIndex + 1, mMatches(i + 1).FirstIndex - mMatches(i).FirstIndex)
                 Else
                     strXZ = Mid(doc, mMatches(i).FirstIndex + 1)
                 End If
                 changeToCmdXZ cutApart(strXZ, CStr(strTemp)), finalStr
-            ElseIf InStr(strTemp, "填空") > 0 Or InStr(strTemp, "双空") > 0 Then
+            ElseIf QuestionType(strTemp, questionTypeTK) = True Then
+                '填空题
                 If i + 1 < mMatches.Count Then
                     strTK = Mid(doc, mMatches(i).FirstIndex + 1, mMatches(i + 1).FirstIndex - mMatches(i).FirstIndex)
                 Else
@@ -644,7 +670,8 @@ Function cutXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileName
                 End If
                 'correctTK strTK
                 changeToCmdTK cutApart(strTK, CStr(strTemp)), finalStr
-            ElseIf InStr(strTemp, "解答") > 0 Then
+            ElseIf QuestionType(strTemp, questionTypeJD) = True Then
+                '解答题
                 If i + 1 < mMatches.Count Then
                     strJD = Mid(doc, mMatches(i).FirstIndex + 1, mMatches(i + 1).FirstIndex - mMatches(i).FirstIndex)
                 Else
@@ -710,6 +737,8 @@ Function CutAnswer(ByVal strAnswer As String) As String
     Set mMatches = re.Execute(strAnswer)
     If mMatches.Count = 1 Then
         strAnswer = Mid(strAnswer, mMatches(0).FirstIndex + mMatches(0).Length + 1)
+    Else
+        strTemp = ""
     End If
     re.Pattern = "[\n\r" + Chr(13) + "][【]?点睛[】]?"
     Set mMatches = re.Execute(strAnswer)
@@ -736,7 +765,7 @@ Function changeToCmdXZ(ByRef strQuestionAndAnswer() As String, ByRef finalStr As
     End If
     For i = 1 To UBound(strQuestionAndAnswer)
         str = strQuestionAndAnswer(i)
-        re.Pattern = "【解析】" '"【解答】"
+        re.Pattern = questionAnswerBoundary '"【解答】"
         If re.test(str) = True Then
             Set mMatches = re.Execute(str)
             strTemp = Mid(str, 1, mMatches(0).FirstIndex)
@@ -835,7 +864,7 @@ Function changeToCmdTK(ByRef strQuestionAndAnswer() As String, ByRef finalStr As
 
     For i = 1 To UBound(strQuestionAndAnswer)
         str = strQuestionAndAnswer(i)
-        re.Pattern = "【解析】" '"【解答】"
+        re.Pattern = questionAnswerBoundary '"【解答】"
         If re.test(str) = True Then
             Set mMatches = re.Execute(str)
             strQuestion = Mid(str, 1, mMatches(0).FirstIndex)
@@ -882,7 +911,7 @@ Function changeToCmdJD(ByRef strQuestionAndAnswer() As String, ByRef finalStr As
 
     For i = 1 To UBound(strQuestionAndAnswer)
         str = strQuestionAndAnswer(i)
-        re.Pattern = "【解析】" '"【解答】"
+        re.Pattern = questionAnswerBoundary '"【解答】"
         If re.test(str) = True Then
             Set mMatches = re.Execute(str)
             strQuestion = Mid(str, 1, mMatches(0).FirstIndex)
@@ -1105,38 +1134,19 @@ Function correct(ByRef str As String)
     correctEnvs str
     correctFig str
     correctTabular str
-    correctMathScript str, "_\{"
-    correctMathScript str, "\\dfrac\{", 2
-    delDoller str, ".\\hh\\color\{two\}."
-    delDoller str, ".\\hh\\color\{blue\}."
-    delDoller str, ".\\tk."
-    delDoller str, ".\\dotfill."
+    'correctMathScript str, "_\{"
+    'correctMathScript str, "\\dfrac\{", 2
+    correctMathScriptInList str
+    'delDoller str, ".\\hh\\color\{two\}."
+    'delDoller str, ".\\hh\\color\{blue\}."
+    'delDoller str, ".\\tk."
+    'delDoller str, ".\\dotfill."
+    DelDollerInList str
     str = delLeftRight(str)
     correctLeftRight str
     'delDoller str, ".\\wendu."
 End Function
-Function correctTK(ByRef str As String)
-    Dim re As Object
-    Dim mMatches As Object      '匹配字符串集合对象
-    Dim prev As Long
-    Dim tempXiuZheng As String
 
-    Set re = New RegExp
-    tempXiuZheng = ""
-    prev = 1
-    re.Global = True
-    re.Pattern = Chr(0)
-
-    Set mMatches = re.Execute(str)
-    If re.test(str) Then
-        For n = 0 To mMatches.Count - 1 Step 2
-            tempXiuZheng = tempXiuZheng + Mid(str, prev, mMatches(n).FirstIndex - prev + 1) + "\tk "
-            prev = mMatches(n + 1).FirstIndex + mMatches(n + 1).Length + 1
-        Next n
-        tempXiuZheng = tempXiuZheng + Mid(str, prev)
-    End If
-    str = tempXiuZheng
-End Function
 Function returnID(ByRef ID As Long) As String
     ID = ID + 1
     returnID = CStr(ID)
@@ -1306,6 +1316,7 @@ Function correctEnvs(ByRef str As String)
         Next
     End If
 End Function
+
 Function correctEnv(ByRef str As String, env As String)
     Dim re As Object
     Dim mMatches As Object      '匹配字符串集合对象
@@ -1433,6 +1444,20 @@ Function correctTabular(ByRef str As String, Optional Qflag As Boolean = True)
             DoEvents
         Next n
         str = tempXiuZheng + Mid(str, prev)
+    End If
+End Function
+
+Function correctMathScriptInList(ByRef str As String)
+    Dim strPram() As String
+    If mathScriptList(0) <> "" Then
+        For Each env In mathScriptList
+            strPram = Split(CStr(env), ";")
+            If UBound(strPram) = 0 Then
+                correctMathScript str, strPram(0)
+            ElseIf UBound(strPram) = 1 Then
+                correctMathScript str, strPram(0), CInt(strPram(1))
+            End If
+        Next
     End If
 End Function
 
@@ -1573,6 +1598,14 @@ Function readAcmd(ByVal coordinate As Long, ByVal str As String, ByRef strCMD As
             Exit Function
         End If
     Loop While True
+End Function
+
+Function DelDollerInList(ByRef str As String)
+    If delDollerList(0) <> "" Then
+        For Each env In delDollerList
+            delDoller str, "." & CStr(env) & "."
+        Next
+    End If
 End Function
 
 Function delDoller(ByRef str As String, strPattern As String)
