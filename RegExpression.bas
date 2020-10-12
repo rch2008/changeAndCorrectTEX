@@ -621,7 +621,7 @@ Function cutXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileName
     strJD = ""
     
     re.Global = True
-    re.Pattern = "(\n|\r|" + Chr(13) + ")" + "\S{0,2}(选择|填空|解答|多选|单选)题"
+    re.Pattern = "(\n|\r|" + Chr(13) + ")" + "\S{0,2}(选择|填空|双空|解答|多选|单选)题"
 
     If re.test(doc) Then
         firstQuestionFlag = True
