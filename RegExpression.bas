@@ -1197,6 +1197,7 @@ Function correctArray(ByRef str As String)
     Dim strTemp As String
     Dim tempXiuZheng As String
     Dim n As Long
+    Dim rightCount As Long
     
     tempXiuZheng = ""
     Set re = New RegExp
@@ -1213,7 +1214,9 @@ Function correctArray(ByRef str As String)
                 strTemp = Mid(str, prev, mMatch.FirstIndex + 1 - prev)
                 If prev > 1 Then
                     'strTemp = re.Replace(strTemp, "\end{cases}")
-                    matchendarray strTemp
+                    If matchendarray(strTemp, rightCount) = False Then
+                        Exit Function
+                    End If
                 End If
                 tempXiuZheng = tempXiuZheng + strTemp + "\begin{cases}"
                 prev = mMatch.FirstIndex + mMatch.Length + 1
@@ -1222,19 +1225,21 @@ Function correctArray(ByRef str As String)
         Next
         strTemp = Mid(str, prev)
         'strTemp = re.Replace(strTemp, "\end{cases}")
-        matchendarray strTemp
+                    If matchendarray(strTemp, rightCount) = False Then
+                        Exit Function
+                    End If
         str = tempXiuZheng + strTemp
     End If
 End Function
 
-Function matchendarray(ByRef str As String) As Boolean
+Function matchendarray(ByRef str As String, ByRef rightCount As Long) As Boolean
     Dim re As Object
     Dim mMatches As Object      'Æ¥Åä×Ö·û´®¼¯ºÏ¶ÔÏó
     Dim mMatch As Object        'Æ¥Åä×Ö·û´®
     Dim prev As Long
     Dim flag As Long
     Dim n As Long
-    Dim strTemp, tempXiuZheng As String
+    Dim strTemp As String, tempXiuZheng As String
     
     tempXiuZheng = ""
     flag = 0
@@ -1253,8 +1258,16 @@ Function matchendarray(ByRef str As String) As Boolean
             End If
             If flag < 0 Then Exit For
         Next
-        strTemp = Left(str, mMatches(n).FirstIndex)
-        strTemp = strTemp + "\end{cases}" + Mid(str, mMatches(n).FirstIndex + mMatches(n).Length + 1)
+        If flag < 0 Then
+            strTemp = Left(str, mMatches(n).FirstIndex)
+            strTemp = strTemp + "\end{cases}" + Mid(str, mMatches(n).FirstIndex + mMatches(n).Length + 1)
+        Else
+            matchendarray = False
+            Exit Function
+        End If
+    Else
+        matchendarray = False
+        Exit Function
     End If
     
     re.Pattern = "(\\left(\.|\(|\[|\\\{|\||\\\||\\[a-zA-Z]+|/|\)|\]|\\\}))|(\\right(\.|\)|\]|\\\}|\||\\\||\\[a-zA-Z]+|\(|\[|\\\{|/))"
@@ -1270,11 +1283,22 @@ Function matchendarray(ByRef str As String) As Boolean
             End If
             If flag < 0 Then Exit For
         Next
-        tempXiuZheng = Left(strTemp, mMatches(n).FirstIndex)
-        tempXiuZheng = tempXiuZheng + Mid(strTemp, mMatches(n).FirstIndex + mMatches(n).Length + 1)
+        If flag < 0 Then
+            tempXiuZheng = Left(strTemp, mMatches(n).FirstIndex)
+            tempXiuZheng = tempXiuZheng + Mid(strTemp, mMatches(n).FirstIndex + mMatches(n).Length + 1)
+        Else
+            rightCount = rightCount + flag + 1
+            matchendarray = False
+            Exit Function
+        End If
+    Else
+        matchendarray = False
+        Exit Function
     End If
     str = tempXiuZheng
+    matchendarray = True
 End Function
+
 Function correctEnvs(ByRef str As String)
     If correctEnvironments(0) <> "" Then
         For Each env In correctEnvironments
@@ -1838,7 +1862,15 @@ Private Function splitNode(ByRef mylink As DBLink, ByVal str As String, ByVal in
                         k = mylink.creatNode(rightstr, True)
                         mylink.linkTwo last, k
                     Else
-                        k = mylink.creatNode(Mid(leftstr, 6) + textStr + Mid(rightstr, 7))
+                        leftstr = Mid(leftstr, 6)
+                        rightstr = Mid(rightstr, 7)
+                        If leftstr = "." Then
+                            leftstr = ""
+                        End If
+                        If rightstr = "." Then
+                            rightstr = ""
+                        End If
+                        k = mylink.creatNode(leftstr + textStr + rightstr)
                         mylink.linkTwo last, k
                     End If
                     i = j
