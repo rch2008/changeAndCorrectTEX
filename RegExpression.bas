@@ -24,6 +24,10 @@ Public correctEnvironments() As String
 Public mathScriptList() As String
 Public delDollerList() As String
 
+Public answerSolutionBoundary As String
+Public solutionStart As String
+Public solutionEnd As String
+
 Public docxToTexPath As String
 Public addDollorFlag As Boolean
 Public correctLeftRightFlag As Boolean
@@ -686,8 +690,8 @@ Function cutXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileName
         correctEnvs doc
         correctFig doc, False
         correctTabular doc, False
-        correctMathScript doc, "_\{"
-        correctMathScript doc, "\\dfrac\{", 2
+        correctMathScriptInList doc
+        DelDollerInList doc
         doc = delLeftRight(doc)
         correctLeftRight doc
         finalStr = doc
@@ -703,8 +707,9 @@ Function cutXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileName
     re.Pattern = "(\n|\r|" + Chr(13) + ")"
     strTestName = re.Replace(strTestName, "")
     finalStr = "\section{" + strTestName + "}" + finalStr + Chr(13) + "\end{myitemize}"
-    readReplaceList
-    replaceList finalStr
+    If readReplaceList = True Then
+        replaceList finalStr
+    End If
 End Function
 
 Function cutApart(ByRef strQuestionAndAnswer As String, strType As String) As String()
@@ -728,19 +733,22 @@ Function CutAnswer(ByVal strAnswer As String) As String
     Dim strTemp As String
     Set re = New RegExp
     re.Global = True
-    re.Pattern = "[\n\r" + Chr(13) + "][【]?解析[】]?"
+'Public AnswerSolutionBoundary As String
+'Public SolutionStart As String
+'Public SolutionEnd As String
+    re.Pattern = "[\n\r" + Chr(13) + "]" + answerSolutionBoundary
     Set mMatches = re.Execute(strAnswer)
     If mMatches.Count = 1 Then
         strTemp = Left(strAnswer, mMatches(0).FirstIndex)
     End If
-    re.Pattern = "[\n\r" + Chr(13) + "][【]?详解[】]?"
+    re.Pattern = "[\n\r" + Chr(13) + "]" + solutionStart
     Set mMatches = re.Execute(strAnswer)
     If mMatches.Count = 1 Then
         strAnswer = Mid(strAnswer, mMatches(0).FirstIndex + mMatches(0).Length + 1)
     Else
         strTemp = ""
     End If
-    re.Pattern = "[\n\r" + Chr(13) + "][【]?点睛[】]?"
+    re.Pattern = "[\n\r" + Chr(13) + "]" + solutionEnd
     Set mMatches = re.Execute(strAnswer)
     If mMatches.Count = 1 Then
         strAnswer = Left(strAnswer, mMatches(0).FirstIndex)
@@ -1134,13 +1142,7 @@ Function correct(ByRef str As String)
     correctEnvs str
     correctFig str
     correctTabular str
-    'correctMathScript str, "_\{"
-    'correctMathScript str, "\\dfrac\{", 2
     correctMathScriptInList str
-    'delDoller str, ".\\hh\\color\{two\}."
-    'delDoller str, ".\\hh\\color\{blue\}."
-    'delDoller str, ".\\tk."
-    'delDoller str, ".\\dotfill."
     DelDollerInList str
     str = delLeftRight(str)
     correctLeftRight str
@@ -1310,7 +1312,7 @@ Function matchendarray(ByRef str As String, ByRef rightCount As Long) As Boolean
 End Function
 
 Function correctEnvs(ByRef str As String)
-    If correctEnvironments(0) <> "" Then
+    If UBound(correctEnvironments) > 0 Then
         For Each env In correctEnvironments
             correctEnv str, CStr(env)
         Next
@@ -1449,7 +1451,7 @@ End Function
 
 Function correctMathScriptInList(ByRef str As String)
     Dim strPram() As String
-    If mathScriptList(0) <> "" Then
+    If UBound(mathScriptList) >= 0 Then
         For Each env In mathScriptList
             strPram = Split(CStr(env), ";")
             If UBound(strPram) = 0 Then
@@ -1601,7 +1603,7 @@ Function readAcmd(ByVal coordinate As Long, ByVal str As String, ByRef strCMD As
 End Function
 
 Function DelDollerInList(ByRef str As String)
-    If delDollerList(0) <> "" Then
+    If UBound(delDollerList) >= 0 Then
         For Each env In delDollerList
             delDoller str, "." & CStr(env) & "."
         Next
@@ -2045,7 +2047,8 @@ Public Function replaceSymbol(ByRef str As String, ByVal strName As String)
     Set re = New RegExp
     re.Global = True
     replaceSymbolList
-
+'替换列表非空
+    If UBound(strReplaceSymbolList) >= 0 Then
         For i = 0 To UBound(strReplaceSymbolList)
             If Trim(strReplaceSymbolList(i)) <> "" Then '非空行，用“;”进行分割
                 fr = Split(strReplaceSymbolList(i), ";")
@@ -2065,6 +2068,7 @@ Public Function replaceSymbol(ByRef str As String, ByVal strName As String)
                 End If
             End If
         Next
+    End If
 End Function
 
 Private Function replaceSymbolList() As Boolean
@@ -2082,7 +2086,7 @@ err1:
     If Err.Number = 53 Then
         MsgBox replaceSymbolListFile & " 未找到！"
     Else
-        MsgBox Err.Number
+        MsgBox Err.Number & Chr(13) & "请查看" & replaceSymbolListFile & "路径是否正确"
     End If
     strReplaceSymbolList = Split("", " ")
     replaceSymbolList = False
@@ -2124,7 +2128,7 @@ err1:
     If Err.Number = 53 Then
         MsgBox replaceListFile & " 未找到！"
     Else
-        MsgBox Err.Number
+        MsgBox Err.Number & Chr(13) & "请查看" & replaceSymbolListFile & "路径是否正确"
     End If
     readReplaceList = False
 End Function
@@ -2195,18 +2199,6 @@ Function correctAlign(ByRef str As String)
             If re.test(strTemp) Then
                 strTemp = re.Replace(strTemp, "")
             End If
-            're.Pattern = "\{array\}"
-            'If re.test(strTemp) = False Then
-            '    re.Pattern = "\\\\"
-            '    If re.test(strTemp) Then
-            '        strTemp = re.Replace(strTemp, "$" & Chr(13) & "$")
-            '    End If
-            'End If
-
-            're.Pattern = "，"
-            'If re.test(strTemp) Then
-            '    strTemp = re.Replace(strTemp, ",")
-            'End If
             tempXiuZheng = tempXiuZheng + TrimEnter(strTemp)
             prev = mMatches(n + 1).FirstIndex + mMatches(n + 1).Length + 1
             DoEvents

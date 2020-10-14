@@ -942,6 +942,31 @@ Function readAppIni()
     Else
         mathScriptList = Split("", ",")
     End If
+'Public AnswerSolutionBoundary As String
+'Public SolutionStart As String
+'Public SolutionEnd As String
+    '答案中简答和详解提取
+    str = GetAppINI("answer", "AnswerSolutionBoundary")
+    str = Replace(str, Chr(0), "")
+    If str <> "" Then
+        answerSolutionBoundary = str
+    Else
+        answerSolutionBoundary = "[【]?解析[】]?"
+    End If
+    str = GetAppINI("answer", "SolutionStart")
+    str = Replace(str, Chr(0), "")
+    If str <> "" Then
+        solutionStart = str
+    Else
+        solutionStart = "[【]?详解[】]?"
+    End If
+    str = GetAppINI("answer", "SolutionEnd")
+    str = Replace(str, Chr(0), "")
+    If str <> "" Then
+        solutionEnd = str
+    Else
+        solutionEnd = "[【]?点睛[】]?"
+    End If
 End Function
 
 Function textEnabled()

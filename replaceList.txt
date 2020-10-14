@@ -15,7 +15,7 @@
 {\div};\div 
 \bot;\perp 
 {\bot};\perp 
-{\perp};\perp 
+#\{\\perp {0,}\};\perp 
 {\pm};\pm 
 {\angle};\angle 
 {\neq};\neq 
@@ -32,5 +32,6 @@
 {\Rightarrow};\Rightarrow 
 {\rightarrow};\rightarrow 
 {\infty};\infty 
+{\quad};
 #\\tk(?!\w);\tk 
 # {2,}; 
