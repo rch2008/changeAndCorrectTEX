@@ -72,7 +72,7 @@ Function onlyToTex()
     Next
 End Function
 
-Function changeToTex()
+Function changeToTex() As String
     Dim PID As Long
     Dim arr() As String
     Dim larr As Integer
@@ -85,6 +85,7 @@ Function changeToTex()
         'MsgBox "未选择docx文件"
         Exit Function
     End If
+    On Error GoTo err1
     For Each docxFileName In strFullName
         arr = Split(docxFileName, ".")
         strPathName = arr(0)
@@ -92,14 +93,18 @@ Function changeToTex()
         strName = arr(UBound(arr))
             
         PID = Shell(docxToTexPath + "convert.bat " + docxFileName, 1)
-    
+        t = Timer()
         If PID <> 0 Then
             hProcess = OpenProcess(&H100000, True, PID)
             WaitForSingleObject hProcess, -1
             CloseHandle hProcess
         End If
+        changeToTex = Timer() - t
         Shell docxToTexPath + "CopyAndDel.bat " + strPathName
     Next
+    Exit Function
+err1:
+    MsgBox "请查看convert.bat CopyAndDel.bat 是否存在，路径是否正确！"
 End Function
 
 Function convertToTex()
@@ -138,7 +143,7 @@ Function convertToTex()
     fileSelect = False
 End Function
 
-Function Main()
+Function Main() As String
     Dim doc As String
     Dim str As String
     Dim arr() As String
@@ -154,7 +159,7 @@ Function Main()
         tempID(0) = questionID
         tempID(1) = figID
         tempID(2) = tabID
-        
+        t = Timer()
         For Each texFileName In strFullName
             finalStr = ""
             readUTF8 texName(texFileName), doc
@@ -169,6 +174,7 @@ Function Main()
                 writeTex strUnidentified, Left(texFileName, Len(texFileName) - Len(arr(UBound(arr))) - 1) + "_VBA.txt"
             End If
         Next
+        Main = Timer() - t
         If ifReadINI = True Then
             If MsgBox("是否将ID号写入INI文件？" + Chr(13) + "是，ID号写入INI文件。" + Chr(13) + "否，ID号不写入INI文件", vbYesNo, "是否写入INI文件") = vbYes Then
                 For Each texFileName In strFullName
@@ -328,7 +334,7 @@ Function beforeChange()
     strFullName = selectFile(2)
     If strFullName(0) <> "" Then
         For Each docxFileName In strFullName
-            Err.Clear
+            err.Clear
             Set wDoc = wApp.Documents.Open(docxFileName)
             Set mySelection = wApp.Documents.Application.Selection
             mySelection.Find.MatchWildcards = False
@@ -340,8 +346,8 @@ Function beforeChange()
             mySelection.Find.Replacement.Font.Underline = wdUnderlineNone
             Call mySelection.Find.Execute("([ 　])@", False, False, True, False, False, True, wdFindContinue, True, "_", wdReplaceAll, False, False, False, False)
             mySelection.Find.MatchWildcards = False
-            If Err.Number <> 0 Then
-                Debug.Print Err
+            If err.Number <> 0 Then
+                Debug.Print err
             End If
             mySelection.WholeStory          '选择文档全部内容
             mySelection.Font.Bold = False   '去粗体
@@ -356,7 +362,7 @@ Function beforeChange()
     Set wApp = Nothing
     Exit Function
 err1:
-    MsgBox Err.Number
+    MsgBox err.Number
     strFullName = selectFile(2)
 End Function
 Function texName(ByVal str As String) As String
@@ -1488,14 +1494,7 @@ Function correctMathScript(ByRef s As String, strPattern As String, Optional bra
             Else
                 str = str + Mid(s, prev, mMatch.FirstIndex + 1 - prev)
             End If
-            prev = nextRightBrace(mMatch.FirstIndex + mMatch.Length + 1, s)
-            For i = 2 To braceNum
-                'prev = prev + 2
-                'prev = nextRightBrace(prev, s)
-                prev = prev + 1
-                nextLBrace prev, s
-                prev = nextRightBrace(prev + 1, s)
-            Next i
+            prev = nextRightBrace(mMatch.FirstIndex + mMatch.Length + 1, s, 2)
             strDScript = Mid(s, mMatch.FirstIndex + 1, prev - mMatch.FirstIndex) '截取下标_{*}
             
             re.Pattern = "\$"
@@ -1676,7 +1675,7 @@ Function adjustDoller(ByRef str As String, strPattern As String)
     str = re.Replace(str, "\end{cases}$" + Chr(13))
 End Function
 
-Function nextRightBrace(ByVal coordinate As Long, ByVal str As String) As Long
+Function nextRightBrace(ByVal coordinate As Long, ByVal str As String, Optional num As Integer = 1) As Long
     Dim c As String
     Dim flag As Boolean
     Dim stack As Integer
@@ -1686,13 +1685,11 @@ Function nextRightBrace(ByVal coordinate As Long, ByVal str As String) As Long
     index = coordinate
     stack = 0
     flag = True
-    RBraceFlag = False
     
     Do
         If coordinate > lenStr Then
-            RBraceFlag = True
-            coordinate = index
-            Exit Do
+            nextRightBrace = index
+            Exit Function
         End If
             
         c = Mid(str, coordinate, 1)
@@ -1702,7 +1699,12 @@ Function nextRightBrace(ByVal coordinate As Long, ByVal str As String) As Long
         ElseIf c = "}" Then
             stack = stack - 1
             If stack < 0 Then
-                flag = False
+                If num = 1 Then
+                    flag = False
+                Else
+                    num = num - 1
+                    coordinate = coordinate + 1
+                End If
             Else
                 coordinate = coordinate + 1
             End If
@@ -2016,17 +2018,7 @@ Function insertTextCmd(ByRef str As String)
 End Function
 
 Function ifneedLR(str As String) As Boolean
-    'Dim s As String
-    'Dim needLRList() As String
-    's = "{array};\frac;\dfrac"
-    'needLRList = Split(s, ";")
-    'For i = 0 To UBound(needLRList)
-    '    j = InStr(1, str, needLRList(i))
-    '    If j > 0 Then
-    '        ifneedLR = True
-    '        Exit Function
-    '    End If
-    'Next
+
     Dim re As Object
     
     Set re = New RegExp
@@ -2083,10 +2075,10 @@ Private Function replaceSymbolList() As Boolean
     replaceSymbolList = True
     Exit Function
 err1:
-    If Err.Number = 53 Then
+    If err.Number = 53 Then
         MsgBox replaceSymbolListFile & " 未找到！"
     Else
-        MsgBox Err.Number & Chr(13) & "请查看" & replaceSymbolListFile & "路径是否正确"
+        MsgBox err.Number & Chr(13) & "请查看" & replaceSymbolListFile & "路径是否正确"
     End If
     strReplaceSymbolList = Split("", " ")
     replaceSymbolList = False
@@ -2125,10 +2117,10 @@ Public Function readReplaceList() As Boolean
     readReplaceList = True
     Exit Function
 err1:
-    If Err.Number = 53 Then
+    If err.Number = 53 Then
         MsgBox replaceListFile & " 未找到！"
     Else
-        MsgBox Err.Number & Chr(13) & "请查看" & replaceSymbolListFile & "路径是否正确"
+        MsgBox err.Number & Chr(13) & "请查看" & replaceSymbolListFile & "路径是否正确"
     End If
     readReplaceList = False
 End Function

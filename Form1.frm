@@ -551,18 +551,19 @@ Private Sub Check3_Click()
 End Sub
 
 Private Sub Command1_Click()
+    Dim tt As String
     Unidentified = 0
     numLabel.Caption = CStr(Unidentified)
     
     texFlagLabel.Caption = "处理中……"
     
     If setID Then
-        Main
+        tt = Main
         IDFresh
         If Unidentified <> 0 Then
             numLabel.Caption = CStr(Unidentified)
         End If
-        texFlagLabel.Caption = "完成！"
+        texFlagLabel.Caption = "完成！" + Chr(13) + tt
     Else
         MsgBox "ID设置错误！"
         texFlagLabel.Caption = "ID设置错误！"
@@ -628,13 +629,14 @@ Private Sub Command15_Click()
 End Sub
 
 Private Sub Command2_Click()
+    Dim tt As String
     texFlagLabel.Caption = "处理中……"
     If setID Then
-        changeToTex
+        tt = changeToTex
     Else
         MsgBox "ID设置错误！"
     End If
-    texFlagLabel.Caption = "完成！"
+    texFlagLabel.Caption = "完成！" + Chr(13) + tt
 End Sub
 
 Private Sub Command3_Click()
@@ -777,6 +779,7 @@ Private Sub Form_DblClick()
     'beforeChange
     'correcttest
     'MsgBox "questionID:" & questionID & " FigID:" & figID & " TabID:" & tabID
+    MsgBox nextRightBrace(1, "$M=\left\{x| \dfrac{x}{x-1}\leqslant 0\right\},N=\{.x| x^{2}-2x<0\}$，")
     MsgBox "$" & TrimEnter(Chr(13) + Chr(13) + "start" + Chr(13), "R") & "$"
     texFlagLabel.Caption = "完成！"
 End Sub
