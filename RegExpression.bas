@@ -334,7 +334,7 @@ Function beforeChange()
     strFullName = selectFile(2)
     If strFullName(0) <> "" Then
         For Each docxFileName In strFullName
-            err.Clear
+            Err.Clear
             Set wDoc = wApp.Documents.Open(docxFileName)
             Set mySelection = wApp.Documents.Application.Selection
             mySelection.Find.MatchWildcards = False
@@ -346,8 +346,8 @@ Function beforeChange()
             mySelection.Find.Replacement.Font.Underline = wdUnderlineNone
             Call mySelection.Find.Execute("([ 　])@", False, False, True, False, False, True, wdFindContinue, True, "_", wdReplaceAll, False, False, False, False)
             mySelection.Find.MatchWildcards = False
-            If err.Number <> 0 Then
-                Debug.Print err
+            If Err.Number <> 0 Then
+                Debug.Print Err
             End If
             mySelection.WholeStory          '选择文档全部内容
             mySelection.Font.Bold = False   '去粗体
@@ -362,7 +362,7 @@ Function beforeChange()
     Set wApp = Nothing
     Exit Function
 err1:
-    MsgBox err.Number
+    MsgBox Err.Number
     strFullName = selectFile(2)
 End Function
 Function texName(ByVal str As String) As String
@@ -1473,7 +1473,7 @@ Function correctMathScript(ByRef s As String, strPattern As String, Optional bra
     Dim re As Object
     Dim mMatches, mMatchesD As Object     '匹配字符串集合对象
     Dim mMatch As Object        '匹配字符串
-    Dim str, strTemp, strDScript As String
+    Dim str As String, strTemp As String, strMathScript As String
     Dim prev As Long
     Dim prevD As Long
     Dim i, lFlag As Integer
@@ -1494,24 +1494,24 @@ Function correctMathScript(ByRef s As String, strPattern As String, Optional bra
             Else
                 str = str + Mid(s, prev, mMatch.FirstIndex + 1 - prev)
             End If
-            prev = nextRightBrace(mMatch.FirstIndex + mMatch.Length + 1, s, 2)
-            strDScript = Mid(s, mMatch.FirstIndex + 1, prev - mMatch.FirstIndex) '截取下标_{*}
+            prev = nextRightBrace(mMatch.FirstIndex + mMatch.Length + 1, s, braceNum)
+            strMathScript = Mid(s, mMatch.FirstIndex + 1, prev - mMatch.FirstIndex) '截取括号内代码
             
             re.Pattern = "\$"
-            If re.test(strDScript) Then
+            If re.test(strMathScript) Then
                 tempXiuZheng = ""
                 prevD = 1
-                Set mMatchesD = re.Execute(strDScript)
+                Set mMatchesD = re.Execute(strMathScript)
                 For n = 0 To mMatchesD.Count - 1 Step 2
-                    tempXiuZheng = tempXiuZheng + Mid(strDScript, prevD, mMatchesD(n).FirstIndex - prevD + 1)
-                    strTemp = "\text{" + Mid(strDScript, mMatchesD(n).FirstIndex + mMatchesD(n).Length + 1, _
+                    tempXiuZheng = tempXiuZheng + Mid(strMathScript, prevD, mMatchesD(n).FirstIndex - prevD + 1)
+                    strTemp = "\text{" + Mid(strMathScript, mMatchesD(n).FirstIndex + mMatchesD(n).Length + 1, _
                                                          mMatchesD(n + 1).FirstIndex - mMatchesD(n).FirstIndex - mMatchesD(n).Length) + "}"
                     tempXiuZheng = tempXiuZheng + strTemp
                     prevD = mMatchesD(n + 1).FirstIndex + mMatchesD(n + 1).Length + 1
                 Next n
-                tempXiuZheng = tempXiuZheng + Mid(strDScript, prevD)
+                tempXiuZheng = tempXiuZheng + Mid(strMathScript, prevD)
             Else
-                tempXiuZheng = strDScript
+                tempXiuZheng = strMathScript
             End If
             prev = prev + 1
             str = str + tempXiuZheng
@@ -2075,10 +2075,10 @@ Private Function replaceSymbolList() As Boolean
     replaceSymbolList = True
     Exit Function
 err1:
-    If err.Number = 53 Then
+    If Err.Number = 53 Then
         MsgBox replaceSymbolListFile & " 未找到！"
     Else
-        MsgBox err.Number & Chr(13) & "请查看" & replaceSymbolListFile & "路径是否正确"
+        MsgBox Err.Number & Chr(13) & "请查看" & replaceSymbolListFile & "路径是否正确"
     End If
     strReplaceSymbolList = Split("", " ")
     replaceSymbolList = False
@@ -2117,10 +2117,10 @@ Public Function readReplaceList() As Boolean
     readReplaceList = True
     Exit Function
 err1:
-    If err.Number = 53 Then
+    If Err.Number = 53 Then
         MsgBox replaceListFile & " 未找到！"
     Else
-        MsgBox err.Number & Chr(13) & "请查看" & replaceSymbolListFile & "路径是否正确"
+        MsgBox Err.Number & Chr(13) & "请查看" & replaceSymbolListFile & "路径是否正确"
     End If
     readReplaceList = False
 End Function
