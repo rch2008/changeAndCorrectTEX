@@ -3,6 +3,8 @@
 \\privateuse(\{\})?;
 '删除\newline
 \\newline;
+\{\\quad\};
+ +_\{;_{
 '替换中文空格
 　; 
 ~; 

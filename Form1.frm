@@ -14,10 +14,18 @@ Begin VB.Form form_tex
    ScaleHeight     =   8025
    ScaleWidth      =   9555
    StartUpPosition =   3  '窗口缺省
+   Begin VB.CommandButton Command16 
+      Caption         =   "delBraceCMD"
+      Height          =   495
+      Left            =   7440
+      TabIndex        =   44
+      Top             =   2040
+      Width           =   1215
+   End
    Begin VB.CommandButton Command15 
       Caption         =   "Join"
       Height          =   495
-      Left            =   8880
+      Left            =   8760
       TabIndex        =   43
       Top             =   2040
       Width           =   615
@@ -106,10 +114,10 @@ Begin VB.Form form_tex
    Begin VB.CommandButton Command11 
       Caption         =   "清空"
       Height          =   495
-      Left            =   7800
+      Left            =   6720
       TabIndex        =   32
       Top             =   2040
-      Width           =   975
+      Width           =   615
    End
    Begin VB.CheckBox Check2 
       Caption         =   "加$"
@@ -122,18 +130,18 @@ Begin VB.Form form_tex
    Begin VB.CommandButton Command10 
       Caption         =   "加数学环境"
       Height          =   495
-      Left            =   4920
+      Left            =   4680
       TabIndex        =   30
       Top             =   2040
-      Width           =   1335
+      Width           =   1215
    End
    Begin VB.CommandButton Command9 
       Caption         =   "复制"
       Height          =   495
-      Left            =   6480
+      Left            =   6000
       TabIndex        =   29
       Top             =   2040
-      Width           =   1095
+      Width           =   615
    End
    Begin VB.CommandButton Command7 
       Caption         =   "..."
@@ -628,6 +636,12 @@ Private Sub Command15_Click()
     texFlagLabel.Caption = "完成！"
 End Sub
 
+Private Sub Command16_Click()
+    texFlagLabel.Caption = "处理中……"
+    RichTextBox1.Text = delBraceCMDInFiles
+    texFlagLabel.Caption = "完成！"
+End Sub
+
 Private Sub Command2_Click()
     Dim tt As String
     texFlagLabel.Caption = "处理中……"
@@ -779,8 +793,7 @@ Private Sub Form_DblClick()
     'beforeChange
     'correcttest
     'MsgBox "questionID:" & questionID & " FigID:" & figID & " TabID:" & tabID
-    MsgBox nextRightBrace(1, "$M=\left\{x| \dfrac{x}{x-1}\leqslant 0\right\},N=\{.x| x^{2}-2x<0\}$，")
-    MsgBox "$" & TrimEnter(Chr(13) + Chr(13) + "start" + Chr(13), "R") & "$"
+    MsgBox correctUDscript("_{2} _{+}_{n}")
     texFlagLabel.Caption = "完成！"
 End Sub
 

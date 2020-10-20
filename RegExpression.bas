@@ -219,6 +219,29 @@ Function JoinTest(Optional joinFlag As Boolean = False) As String
     JoinTest = finalStr
 End Function
 
+Function delBraceCMDInFiles(Optional joinFlag As Boolean = False) As String
+    Dim doc As String
+    Dim str As String
+    Dim arr() As String
+    Dim finalStr As String
+    Dim allFilesName As String
+    Dim texFileName
+    allFilesName = ""
+    strUnidentified = ""
+    If fileSelect = False And joinFlag = False Then
+        strFullName = selectFile(1)
+    End If
+    If strFullName(0) <> "" Then
+        For Each texFileName In strFullName
+            finalStr = ""
+            readUTF8 texName(texFileName), doc
+            delBraceCMD doc      'Ìæ»»£¬É¾³ýÒ»Ð©·ûºÅ
+            writeTex doc, CStr(texFileName)
+        Next
+    End If
+    delBraceCMDInFiles = doc
+End Function
+
 Function joinXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileName As String, joinFlag As Boolean)
     Dim re As Object
     Dim mMatches As Object      'Æ¥Åä×Ö·û´®¼¯ºÏ¶ÔÏó
@@ -568,13 +591,13 @@ Function correctUDscript(ByRef str As String)
     re.Pattern = "_\{"
     If re.test(str) Then
         Set mMatches = re.Execute(str)
-        If mMatches.Count > 0 Then
+        If mMatches.Count > 1 Then
             For i = 0 To mMatches.Count - 1
-                If stIndex > mMatches(i).FirstIndex Then
-                    GoTo nextDscript
-                Else
+                If stIndex = 1 Or stIndex <= mMatches(i).FirstIndex Then
                     edIndex = mMatches(i).FirstIndex + mMatches(i).Length
                     tempXiuZheng = tempXiuZheng + Mid(str, stIndex, edIndex - stIndex + 1)
+                Else
+                    GoTo nextDscript
                 End If
                 mutiflag = True
                 Do
@@ -606,13 +629,13 @@ nextDscript:
     re.Pattern = "\^\{"
     If re.test(str) Then
         Set mMatches = re.Execute(str)
-        If mMatches.Count > 0 Then
+        If mMatches.Count > 1 Then
             For i = 0 To mMatches.Count - 1
-                If stIndex > mMatches(i).FirstIndex Then
-                    GoTo nextUscript
-                Else
+                If stIndex = 1 Or stIndex <= mMatches(i).FirstIndex Then
                     edIndex = mMatches(i).FirstIndex + mMatches(i).Length
                     tempXiuZheng = tempXiuZheng + Mid(str, stIndex, edIndex - stIndex + 1)
+                Else
+                    GoTo nextUscript
                 End If
                 mutiflag = True
                 Do
