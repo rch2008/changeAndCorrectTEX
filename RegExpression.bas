@@ -786,11 +786,15 @@ Function CutAnswer(ByVal strAnswer As String) As String
 End Function
 Function changeToCmdXZ(ByRef strQuestionAndAnswer() As String, ByRef finalStr As String)
     Dim strQuestion() As String
+    Dim strCTemp(4) As String
     Dim strAnswer As String
     Dim strTemp As String
     Dim str As String
+    Dim item As String
+    Dim flag As Boolean 'true 普通选择题 false为图像选择题
     Dim re As Object
-    Dim mMatches As Object      '匹配字符串集合对象
+    Dim mMatches As Object, cMatches As Object     '匹配字符串集合对象
+    
     Set re = New RegExp
     re.Global = True
     '下标可能越界
@@ -813,19 +817,45 @@ Function changeToCmdXZ(ByRef strQuestionAndAnswer() As String, ByRef finalStr As
             strQuestion = splitXX(strTemp)
             ''''''''''''''''''''''''''''''''''''''''''''''''''''
             ''TrimEnter strQuestion(UBound(strQuestion))
-            For j = 0 To UBound(strQuestion)
-                insertDollerT strQuestion(j)
-                '修正
-                correct strQuestion(j)
-                strQuestion(j) = TrimEnter(strQuestion(j))
+            re.Pattern = "\\includegraphics\[width=\\lFigWidth\]\{([\w-/])+/image([0-9])+\.png\}"
+            For j = 1 To UBound(strQuestion)
+                strCTemp(j) = TrimEnter(strQuestion(j))
+                Set mMatches = re.Execute(strCTemp(j))
+                If mMatches.Count > 0 Then
+                    If mMatches(0).Length <> Len(strCTemp(j)) Then
+                        flag = True
+                        Exit For
+                    End If
+                Else
+                    flag = True
+                    Exit For
+                End If
             Next j
+            If flag = True Then
+                item = "\itemX{"
+                For j = 0 To UBound(strQuestion)
+                    insertDollerT strQuestion(j)
+                    '修正
+                    correct strQuestion(j)
+                    strQuestion(j) = TrimEnter(strQuestion(j))
+                Next j
+            Else
+                item = "\itemF{"
+                insertDollerT strQuestion(0)
+                '修正
+                correct strQuestion(0)
+                strQuestion(0) = TrimEnter(strQuestion(0))
+                For j = 1 To UBound(strQuestion)
+                    strQuestion(j) = strCTemp(j)
+                Next j
+            End If
             insertDollerT strAnswer
             re.Pattern = "故选"
             '修正
             correct strAnswer
             strAnswer = re.Replace(strAnswer, Chr(13) + "\hh\color{blue}故选")
             lastReplace strAnswer
-            finalStr = finalStr + Chr(13) + "\itemX{" + returnID(questionID) + "}{" + strQuestion(0) + "\xz }"
+            finalStr = finalStr + Chr(13) + item + returnID(questionID) + "}{" + strQuestion(0) + "\xz }"
             For k = 1 To UBound(strQuestion)
                 finalStr = finalStr + Chr(13) + "{" + strQuestion(k) + "}"
             Next k
@@ -1102,7 +1132,7 @@ Function TrimEnter(ByVal str As String, Optional LR As String = "") As String
     prev = 1
     Set re = New RegExp
     re.Global = True
-    re.Pattern = "(\n|\r|" + Chr(13) + ")+" '加数学环境
+    re.Pattern = "(\n|\r|" + Chr(13) + "| )+" '加数学环境
     
     'str = Chr(13) + "math" + Chr(13) + Chr(13)
     Set eMatches = re.Execute(str)
