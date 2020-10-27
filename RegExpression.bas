@@ -364,8 +364,8 @@ Function beforeChange()
             mySelection.Find.MatchWildcards = True
             Call mySelection.Find.Execute("([0-9]@．)（[0-9]{1,2}分）", False, False, True, False, False, True, wdFindContinue, False, "\1", wdReplaceAll, False, False, False, False)
             Call mySelection.Find.Execute("声明：*25151492", False, False, True, False, False, True, wdFindContinue, False, "", wdReplaceAll, False, False, False, False)
-            mySelection.Find.Font.Underline = wdUnderlineSingle
-            Call mySelection.Find.Execute("([! |　])@", False, False, True, False, False, True, wdFindContinue, True, " ", wdReplaceAll, False, False, False, False)
+'            mySelection.Find.Font.Underline = wdUnderlineSingle
+'            Call mySelection.Find.Execute("([! |　])@", False, False, True, False, False, True, wdFindContinue, True, " ", wdReplaceAll, False, False, False, False)
             mySelection.Find.Replacement.Font.Underline = wdUnderlineNone
             Call mySelection.Find.Execute("([ 　])@", False, False, True, False, False, True, wdFindContinue, True, "_", wdReplaceAll, False, False, False, False)
             mySelection.Find.MatchWildcards = False
@@ -729,7 +729,7 @@ Function cutXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileName
     finalStr = re.Replace(finalStr, "")
     '$修正
     'adjustDoller finalStr, "." + "(\n|\r|" + Chr(13) + ")."
-    re.Pattern = "\$ +\$"
+    re.Pattern = "\$ *\$"
     finalStr = re.Replace(finalStr, "")
     re.Pattern = "(\n|\r|" + Chr(13) + ")" + "(\\item(X|T|J|F))"
     If re.test(finalStr) Then
@@ -1034,6 +1034,7 @@ Function questionList(ByRef strQuestion As String)
     Else
         insertDollerT strQuestion
         correct strQuestion
+        strQuestion = TrimEnter(strQuestion)
     End If
 End Function
 
@@ -1065,7 +1066,7 @@ Function insertDollerT(ByRef str As String)
         str = strTemp
     End If
 End Function
-
+'加$  已废弃
 Function addDollor(ByVal str As String) As String
     Dim re As Object
     Dim eMatches As Object
@@ -1599,64 +1600,6 @@ Public Function nextLBrace(ByRef coordinate As Long, ByVal str As String) As Boo
     Loop While True
 End Function
 
-Function readAcmd(ByVal coordinate As Long, ByVal str As String, ByRef strCMD As String) As Long
-    Dim c As String                                                     '返回值为命令结尾字符坐标
-    Dim l As Long
-    Dim index As Long
-    Dim cmdStartFlag As Boolean
-    
-    cmdStartFlag = False
-    index = coordinate
-    strCMD = ""
-    l = Len(str)
-    
-    Do
-        If index <= l Then
-            c = Mid(str, index, 1)
-            If c = " " Then         '读取下一个字符
-            ElseIf c = "{" Then
-                If cmdStartFlag = False Then
-                    strCMD = c
-                    readAcmd = index
-                Else
-                    readAcmd = index - 1
-                End If
-                Exit Function
-            ElseIf c = "\" Then
-                If cmdStartFlag = False Then
-                    cmdStartFlag = True
-                    strCMD = strCMD + c
-                Else
-                    readAcmd = index
-                    Exit Function
-                End If
-            ElseIf InStr(1, "0123456789", c) > 0 Then
-                If cmdStartFlag = False Then
-                    strCMD = c
-                    readAcmd = index
-                Else
-                    readAcmd = index - 1
-                End If
-                Exit Function
-            ElseIf InStr(1, "abcdefghijklmnopqrstuvwxyz", c) > 0 Or InStr(1, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", c) > 0 Then
-                If cmdStartFlag = False Then
-                    strCMD = c
-                    readAcmd = index
-                    Exit Function
-                Else
-                    strCMD = strCMD + c
-                End If
-            Else
-                readAcmd = index
-                Exit Function
-            End If
-            index = index + 1
-        Else
-            Exit Function
-        End If
-    Loop While True
-End Function
-
 Function DelDollerInList(ByRef str As String)
     If UBound(delDollerList) >= 0 Then
         For Each env In delDollerList
@@ -1698,7 +1641,7 @@ Function delDoller(ByRef str As String, strPattern As String)
         str = tempXiuZheng
     End If
 End Function
-
+'调整$位置， 已废弃
 Function adjustDoller(ByRef str As String, strPattern As String)
     Dim re As Object
     Dim mMatches As Object      '匹配字符串集合对象
