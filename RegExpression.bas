@@ -728,8 +728,10 @@ Function cutXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileName
     re.Pattern = "\\frontPath/"
     finalStr = re.Replace(finalStr, "")
     '$ÐÞÕý
-    adjustDoller finalStr, "." + "(\n|\r|" + Chr(13) + ")."
-    re.Pattern = "(\n|\r|" + Chr(13) + ")" + "(\\item(X|T|J))"
+    'adjustDoller finalStr, "." + "(\n|\r|" + Chr(13) + ")."
+    re.Pattern = "\$ +\$"
+    finalStr = re.Replace(finalStr, "")
+    re.Pattern = "(\n|\r|" + Chr(13) + ")" + "(\\item(X|T|J|F))"
     If re.test(finalStr) Then
         finalStr = re.Replace(finalStr, Chr(13) + Chr(13) + "$2")
     End If
@@ -805,6 +807,7 @@ Function changeToCmdXZ(ByRef strQuestionAndAnswer() As String, ByRef finalStr As
         finalStr = finalStr + Chr(13) + "\end{myitemize}" + strQuestionAndAnswer(0) + Chr(13) + "\begin{myitemize}" + Chr(13)
     End If
     For i = 1 To UBound(strQuestionAndAnswer)
+        flag = False
         str = strQuestionAndAnswer(i)
         re.Pattern = questionAnswerBoundary '"¡¾½â´ð¡¿"
         If re.test(str) = True Then
