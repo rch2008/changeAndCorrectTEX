@@ -1207,6 +1207,7 @@ Function correct(ByRef str As String)
     correctTabular str
     correctMathScriptInList str
     DelDollerInList str
+    correctDfracInScript str
     str = delLeftRight(str)
     correctLeftRight str
     'delDoller str, ".\\wendu."
@@ -1572,6 +1573,40 @@ Function correctMathScript(ByRef s As String, strPattern As String, Optional bra
             End If
             prev = prev + 1
             str = str + tempXiuZheng
+nextmMatch:
+            DoEvents
+        Next
+        s = str + Mid(s, prev)
+    End If
+End Function
+
+Function correctDfracInScript(ByRef s As String)
+    Dim re As Object
+    Dim mMatches, mMatchesD As Object     'Æ¥Åä×Ö·û´®¼¯ºÏ¶ÔÏó
+    Dim mMatch As Object        'Æ¥Åä×Ö·û´®
+    Dim str As String, strMathScript As String
+    Dim prev As Long
+    
+    prev = 1
+    str = ""
+    
+    Set re = New RegExp
+    re.Global = True
+    re.Pattern = "[\^_]\{"
+    
+    Set mMatches = re.Execute(s)
+    If mMatches.Count > 0 Then
+        For Each mMatch In mMatches
+            If mMatch.FirstIndex < prev Then
+                GoTo nextmMatch
+            Else
+                str = str + Mid(s, prev, mMatch.FirstIndex + 1 - prev)
+            End If
+            prev = nextRightBrace(mMatch.FirstIndex + mMatch.Length + 1, s)
+            strMathScript = Mid(s, mMatch.FirstIndex + 1, prev - mMatch.FirstIndex) '½ØÈ¡À¨ºÅÄÚ´úÂë
+            strMathScript = Replace(strMathScript, "\dfrac{", "\frac{")
+            str = str + strMathScript
+            prev = prev + 1
 nextmMatch:
             DoEvents
         Next
