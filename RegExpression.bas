@@ -410,7 +410,7 @@ Function cutDocument(ByRef str As String) As String
         s = Mid(s, mMatches(0).FirstIndex + mMatches(0).Length + 1, mMatches(1).FirstIndex - mMatches(0).FirstIndex - mMatches(0).Length)
         re.Pattern = "\$"
         s = re.Replace(s, "")
-        re.Pattern = "(\n|\r|" + Chr(13) + "){2,}"  '
+        re.Pattern = "(\n|\r|" + Chr(13) + ")+"  '
         s = re.Replace(s, Chr(13))
         re.Pattern = "声明：(.)+25151492"
         s = re.Replace(s, "")
@@ -1125,7 +1125,7 @@ Function addDollor(ByVal str As String) As String
     addDollor = strTemp
 End Function
 
-Function TrimEnter(ByVal str As String, Optional LR As String = "") As String
+Function TrimEnterA(ByVal str As String, Optional LR As String = "") As String
     Dim re As Object
     Dim eMatches As Object
     Dim strTemp As String
@@ -1142,7 +1142,7 @@ Function TrimEnter(ByVal str As String, Optional LR As String = "") As String
     Set eMatches = re.Execute(str)
     If eMatches.Count = 0 Then
         '无回车
-        TrimEnter = str
+        TrimEnterA = str
         Exit Function
     ElseIf eMatches.Count = 1 Then
         If eMatches(0).Length <> Len(str) Then
@@ -1195,7 +1195,54 @@ Function TrimEnter(ByVal str As String, Optional LR As String = "") As String
     Else
         strTemp = str
     End If
-    TrimEnter = strTemp
+    TrimEnterA = strTemp
+End Function
+
+Function TrimEnter(ByVal str As String, Optional LR As String = "") As String
+    Dim c As String
+    Dim flag As Boolean
+    Dim startStr As Long, endStr As Long
+    Dim coordinate As Long, lenStr As Long
+    
+    lenStr = Len(str)
+    coordinate = 1
+    flag = True
+    
+    Do
+        If coordinate > lenStr Then
+            Exit Function
+        End If
+            
+        c = Mid(str, coordinate, 1)
+        If c = " " Or c = Chr(13) Then
+            coordinate = coordinate + 1
+        Else
+            startStr = coordinate
+            flag = False
+        End If
+        'DoEvents
+    Loop While flag
+    flag = True
+    coordinate = lenStr
+    Do
+        c = Mid(str, coordinate, 1)
+        If c = " " Or c = Chr(13) Then
+            coordinate = coordinate - 1
+        Else
+            endStr = coordinate
+            flag = False
+        End If
+        'DoEvents
+    Loop While flag
+    If LR = "" Then
+        TrimEnter = Mid(str, startStr, endStr - startStr + 1)
+    ElseIf UCase(LR) = "R" Then
+        TrimEnter = Mid(str, 1, endStr)
+    ElseIf UCase(LR) = "L" Then
+        TrimEnter = Mid(str, startStr)
+    Else
+        MsgBox "TrimEnter参数 LR 错误!"
+    End If
 End Function
 
 Function correct(ByRef str As String)

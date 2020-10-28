@@ -1,4 +1,4 @@
-form_tex = 0, 0, 0, 0, C, 0, 0, 0, 0, C
+form_tex = 0, 0, 0, 0, C, 50, 50, 834, 506, C
 RegExpression = 25, 25, 809, 481, Z
 INI = 0, 0, 0, 0, C
 selectFilesAPI = 0, 0, 0, 0, C
