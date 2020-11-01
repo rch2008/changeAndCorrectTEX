@@ -793,6 +793,10 @@ Private Sub Form_DblClick()
     'beforeChange
     'correcttest
     'MsgBox "questionID:" & questionID & " FigID:" & figID & " TabID:" & tabID
+    Dim s As String
+    s = "{a_{2}}^{2}+2a\tensor[_{3}^{}]{a}{}\tensor*[_{7}^{}]{+}{}a\tensor*[_{6}^{}]{a}{}\tensor*[_{10}^{}]{=}{}16"
+    
+    delTensor s
     MsgBox correctUDscript("_{2} _{+}_{n}")
     texFlagLabel.Caption = "Íê³É£¡"
 End Sub

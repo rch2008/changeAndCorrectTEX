@@ -405,6 +405,7 @@ Function cutDocument(ByRef str As String) As String
     re.Global = True
     s = str
     Call delBraceCMD(s)
+    DelTensor s
     Set mMatches = re.Execute(s)
     If mMatches.Count = 2 Then
         s = Mid(s, mMatches(0).FirstIndex + mMatches(0).Length + 1, mMatches(1).FirstIndex - mMatches(0).FirstIndex - mMatches(0).Length)
@@ -1756,6 +1757,66 @@ Function adjustDoller(ByRef str As String, strPattern As String)
     str = re.Replace(str, "\end{cases}$" + Chr(13))
 End Function
 
+Function nextLeftBrace(ByVal coordinate As Long, ByVal str As String, Optional num As Integer = 1) As Long
+    Dim c As String
+    Dim flag As Boolean
+    Dim stack As Integer
+    Dim index, lenStr As Long
+    
+    lenStr = Len(str)
+    index = coordinate
+    stack = 0
+    flag = True
+    
+    Do
+        If coordinate > lenStr Then
+            nextLeftBrace = 0
+            Exit Function
+        End If
+            
+        c = Mid(str, coordinate, 1)
+         If c = "}" Then
+            stack = stack + 1
+            coordinate = coordinate + 1
+        ElseIf c = "{" Then
+            stack = stack - 1
+            If stack < 0 Then
+                If num = 1 Then
+                    flag = False
+                Else
+                    num = num - 1
+                    coordinate = coordinate + 1
+                End If
+            Else
+                coordinate = coordinate + 1
+            End If
+        ElseIf c = "\" Then
+            If Mid(str, coordinate + 1, 4) = "left" Then
+                coordinate = coordinate + 5
+                If Mid(str, coordinate, 1) = "\" Then
+                    coordinate = coordinate + 2
+                Else
+                    coordinate = coordinate + 1
+                End If
+            ElseIf Mid(str, coordinate + 1, 5) = "right" Then
+                coordinate = coordinate + 6
+                If Mid(str, coordinate, 1) = "\" Then
+                    coordinate = coordinate + 2
+                Else
+                    coordinate = coordinate + 1
+                End If
+            Else
+                coordinate = coordinate + 2
+            End If
+        Else
+            coordinate = coordinate + 1
+        End If
+        DoEvents
+    Loop While flag
+
+    nextLeftBrace = coordinate
+End Function
+
 Function nextRightBrace(ByVal coordinate As Long, ByVal str As String, Optional num As Integer = 1) As Long
     Dim c As String
     Dim flag As Boolean
@@ -1814,6 +1875,67 @@ Function nextRightBrace(ByVal coordinate As Long, ByVal str As String, Optional 
     Loop While flag
 
     nextRightBrace = coordinate
+End Function
+
+
+Function nextRightSquareBrackets(ByRef coordinate As Long, ByVal str As String, Optional num As Integer = 1) As Boolean
+    Dim c As String
+    Dim flag As Boolean
+    Dim stack As Integer
+    Dim index, lenStr As Long
+    
+    lenStr = Len(str)
+    index = coordinate
+    stack = 0
+    flag = True
+    
+    Do
+        If coordinate > lenStr Then
+            coordinate = index
+            nextRightSquareBrackets = False
+            Exit Function
+        End If
+            
+        c = Mid(str, coordinate, 1)
+         If c = "[" Then
+            stack = stack + 1
+            coordinate = coordinate + 1
+        ElseIf c = "]" Then
+            stack = stack - 1
+            If stack < 0 Then
+                If num = 1 Then
+                    flag = False
+                Else
+                    num = num - 1
+                    coordinate = coordinate + 1
+                End If
+            Else
+                coordinate = coordinate + 1
+            End If
+        ElseIf c = "\" Then
+            If Mid(str, coordinate + 1, 4) = "left" Then
+                coordinate = coordinate + 5
+                If Mid(str, coordinate, 1) = "\" Then
+                    coordinate = coordinate + 2
+                Else
+                    coordinate = coordinate + 1
+                End If
+            ElseIf Mid(str, coordinate + 1, 5) = "right" Then
+                coordinate = coordinate + 6
+                If Mid(str, coordinate, 1) = "\" Then
+                    coordinate = coordinate + 2
+                Else
+                    coordinate = coordinate + 1
+                End If
+            Else
+                coordinate = coordinate + 2
+            End If
+        Else
+            coordinate = coordinate + 1
+        End If
+        DoEvents
+    Loop While flag
+    nextRightSquareBrackets = True
 End Function
 
 Function readINI() As Boolean
@@ -2279,4 +2401,45 @@ Function correctAlign(ByRef str As String)
         str = tempXiuZheng + Mid(str, prev)
     End If
 
+End Function
+
+Function DelTensor(ByRef s As String)
+    Dim re As Object
+    Dim mMatches As Object      '匹配字符串集合对象
+    Dim mMatch As Object        '匹配字符串
+    Dim str As String, strTemp As String
+    Dim prev As Long, index As Long
+    
+    prev = 1
+    Set re = New RegExp
+    re.Pattern = "\\tensor[\*]?\["
+    re.Global = True
+    
+    Set mMatches = re.Execute(s)
+    If mMatches.Count > 0 Then
+        For Each mMatch In mMatches
+            If prev <= mMatch.FirstIndex + 1 Then
+                str = str + Mid(s, prev, mMatch.FirstIndex + 1 - prev)
+                prev = mMatch.FirstIndex + mMatch.Length + 1
+                If nextRightSquareBrackets(prev, s) = True Then                     '截取方括号内参数
+                    strTemp = Mid(s, mMatch.FirstIndex + mMatch.Length + 1, prev - mMatch.FirstIndex - mMatch.Length - 1)
+                End If
+                prev = nextLeftBrace(prev + 1, s)
+                index = nextRightBrace(prev + 1, s)
+                strTemp = strTemp + Mid(s, prev + 1, index - prev - 1)              '截取第一花括号内参数
+                prev = index + 1
+                prev = nextLeftBrace(prev, s)
+                index = nextRightBrace(prev + 1, s)
+                strTemp = strTemp + Mid(s, prev + 1, index - prev - 1)              '截取第二花括号内参数
+                strTemp = Replace(strTemp, "^{}", "")
+                strTemp = Replace(strTemp, "_{}", "")
+                str = str + strTemp
+                prev = index + 1
+            End If
+            DoEvents
+        Next
+        str = str + Mid(s, prev)
+        Debug.Print str
+        s = str
+    End If
 End Function
