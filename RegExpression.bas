@@ -364,9 +364,9 @@ Function beforeChange()
             mySelection.Find.MatchWildcards = True
             Call mySelection.Find.Execute("([0-9]@£®)£¨[0-9]{1,2}·Ö£©", False, False, True, False, False, True, wdFindContinue, False, "\1", wdReplaceAll, False, False, False, False)
             Call mySelection.Find.Execute("ÉùÃ÷£º*25151492", False, False, True, False, False, True, wdFindContinue, False, "", wdReplaceAll, False, False, False, False)
-'            mySelection.Find.Font.Underline = wdUnderlineSingle
+            mySelection.Find.Font.Underline = wdUnderlineSingle
 '            Call mySelection.Find.Execute("([! |¡¡])@", False, False, True, False, False, True, wdFindContinue, True, " ", wdReplaceAll, False, False, False, False)
-            mySelection.Find.Replacement.Font.Underline = wdUnderlineNone
+            mySelection.Find.Replacement.Font.Underline = wdUnderlineSingle
             Call mySelection.Find.Execute("([ ¡¡])@", False, False, True, False, False, True, wdFindContinue, True, "_", wdReplaceAll, False, False, False, False)
             mySelection.Find.MatchWildcards = False
             If Err.Number <> 0 Then
@@ -735,6 +735,8 @@ Function cutXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileName
     re.Pattern = "(\n|\r|" + Chr(13) + ")" + "(\\item(X|T|J|F))"
     If re.test(finalStr) Then
         finalStr = re.Replace(finalStr, Chr(13) + Chr(13) + "$2")
+        re.Pattern = "(\\begin\{myitemize\})" + "(\n|\r|" + Chr(13) + ")+"
+        finalStr = re.Replace(finalStr, "$1" + Chr(13))
     End If
     re.Pattern = "(\n|\r|" + Chr(13) + ")"
     strTestName = re.Replace(strTestName, "")
