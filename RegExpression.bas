@@ -18,6 +18,7 @@ Public braceCMDList As String
 Public questionTypeXZ As String
 Public questionTypeTK As String
 Public questionTypeJD As String
+Public questionTypeWB As String
 Public answerBoundary As String
 Public questionAnswerBoundary As String
 Public correctEnvironments() As String
@@ -671,15 +672,17 @@ Function cutXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileName
     Dim strXZ As String
     Dim strTK As String
     Dim strJD As String
+    Dim strWB As String
     Dim arr() As String
     
     Set re = New RegExp
     strXZ = ""
     strTK = ""
     strJD = ""
+    strWB = ""
     
     re.Global = True
-    re.Pattern = "(\n|\r|" + Chr(13) + ")" + "\S{0,2}(" + questionTypeXZ + "|" + questionTypeTK + "|" + questionTypeJD + ")"
+    re.Pattern = "(\n|\r|" + Chr(13) + ")" + "\S{0,2}(" + questionTypeXZ + "|" + questionTypeTK + "|" + questionTypeJD + "|" + questionTypeWB + ")"
 
     If re.test(doc) Then
         firstQuestionFlag = True
@@ -712,19 +715,19 @@ Function cutXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileName
                     strJD = Mid(doc, mMatches(i).FirstIndex + 1)
                 End If
                 changeToCmdJD cutApart(strJD, CStr(strTemp)), finalStr
+            ElseIf QuestionType(strTemp, questionTypeWB) = True Then
+                '文本
+                If i + 1 < mMatches.Count Then
+                    strWB = Mid(doc, mMatches(i).FirstIndex + 1, mMatches(i + 1).FirstIndex - mMatches(i).FirstIndex)
+                Else
+                    strWB = Mid(doc, mMatches(i).FirstIndex + 1)
+                End If
+                finalStr = finalStr + ExeText(strWB)
             End If
             DoEvents
         Next i
     Else
-        insertDollerT doc
-        correctEnvs doc
-        correctFig doc, False
-        correctTabular doc, False
-        correctMathScriptInList doc
-        DelDollerInList doc
-        doc = delLeftRight(doc)
-        correctLeftRight doc
-        finalStr = doc
+        finalStr = ExeText(doc)
     End If
     re.Pattern = "\\frontPath/"
     finalStr = re.Replace(finalStr, "")
@@ -746,6 +749,17 @@ Function cutXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileName
     End If
 End Function
 
+Function ExeText(ByVal str As String) As String
+    insertDollerT str
+    correctEnvs str
+    correctFig str, False
+    correctTabular str, False
+    correctMathScriptInList str
+    DelDollerInList str
+    str = delLeftRight(str)
+    correctLeftRight str
+    ExeText = str
+End Function
 Function cutApart(ByRef strQuestionAndAnswer As String, strType As String) As String()
     Dim re As Object
     Dim mMatches As Object      '匹配字符串集合对象

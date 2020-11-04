@@ -796,7 +796,7 @@ Private Sub Form_DblClick()
     Dim s As String
     s = "{a_{2}}^{2}+2a\tensor[_{3}^{}]{a}{}\tensor*[_{7}^{}]{+}{}a\tensor*[_{6}^{}]{a}{}\tensor*[_{10}^{}]{=}{}16"
     
-    delTensor s
+    DelTensor s
     MsgBox correctUDscript("_{2} _{+}_{n}")
     texFlagLabel.Caption = "完成！"
 End Sub
@@ -918,6 +918,14 @@ Function readAppIni()
         questionTypeTK = "填空题"
     End If
     
+    str = GetAppINI("fullFileName", "questionTypeWB")
+    str = Replace(str, Chr(0), "")
+    If str <> "" Then
+        questionTypeWB = str
+    Else
+        questionTypeWB = "文本"
+    End If
+        
     str = GetAppINI("fullFileName", "questionTypeJD")
     str = Replace(str, Chr(0), "")
     If str <> "" Then
