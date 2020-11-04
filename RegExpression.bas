@@ -366,7 +366,7 @@ Function beforeChange()
             Call mySelection.Find.Execute("ÉùÃ÷£º*25151492", False, False, True, False, False, True, wdFindContinue, False, "", wdReplaceAll, False, False, False, False)
             mySelection.Find.Font.Underline = wdUnderlineSingle
 '            Call mySelection.Find.Execute("([! |¡¡])@", False, False, True, False, False, True, wdFindContinue, True, " ", wdReplaceAll, False, False, False, False)
-            mySelection.Find.Replacement.Font.Underline = wdUnderlineSingle
+            mySelection.Find.Replacement.Font.Underline = wdUnderlineNone
             Call mySelection.Find.Execute("([ ¡¡])@", False, False, True, False, False, True, wdFindContinue, True, "_", wdReplaceAll, False, False, False, False)
             mySelection.Find.MatchWildcards = False
             If Err.Number <> 0 Then
