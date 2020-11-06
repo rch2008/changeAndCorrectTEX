@@ -817,12 +817,12 @@ Function changeToCmdXZ(ByRef strQuestionAndAnswer() As String, ByRef finalStr As
     Set re = New RegExp
     re.Global = True
     '下标可能越界
-    If firstQuestionFlag = True Then
+    'If firstQuestionFlag = True Then
         finalStr = finalStr + strQuestionAndAnswer(0) + Chr(13) + "\begin{myitemize}" + Chr(13)
-        firstQuestionFlag = False
-    Else
-        finalStr = finalStr + Chr(13) + "\end{myitemize}" + strQuestionAndAnswer(0) + Chr(13) + "\begin{myitemize}" + Chr(13)
-    End If
+    '    firstQuestionFlag = False
+    'Else
+    '    finalStr = finalStr + Chr(13) + "\end{myitemize}" + strQuestionAndAnswer(0) + Chr(13) + "\begin{myitemize}" + Chr(13)
+    'End If
     For i = 1 To UBound(strQuestionAndAnswer)
         flag = False
         str = strQuestionAndAnswer(i)
@@ -890,6 +890,7 @@ Function changeToCmdXZ(ByRef strQuestionAndAnswer() As String, ByRef finalStr As
         End If
         DoEvents
     Next i
+    finalStr = finalStr + Chr(13) + "\end{myitemize}" + Chr(13)
 End Function
 
 Function splitXX(ByVal str As String) As String()
@@ -942,12 +943,7 @@ Function changeToCmdTK(ByRef strQuestionAndAnswer() As String, ByRef finalStr As
     Set re = New RegExp
     re.Global = True
     '下标可能越界
-    If firstQuestionFlag = True Then
-        finalStr = finalStr + strQuestionAndAnswer(0) + Chr(13) + "\begin{myitemize}" + Chr(13)
-        firstQuestionFlag = False
-    Else
-        finalStr = finalStr + Chr(13) + "\end{myitemize}" + strQuestionAndAnswer(0) + Chr(13) + "\begin{myitemize}" + Chr(13)
-    End If
+    finalStr = finalStr + strQuestionAndAnswer(0) + Chr(13) + "\begin{myitemize}" + Chr(13)
 
     For i = 1 To UBound(strQuestionAndAnswer)
         str = strQuestionAndAnswer(i)
@@ -977,6 +973,7 @@ Function changeToCmdTK(ByRef strQuestionAndAnswer() As String, ByRef finalStr As
         End If
         DoEvents
     Next
+    finalStr = finalStr + Chr(13) + "\end{myitemize}" + Chr(13)
 End Function
 
 Function changeToCmdJD(ByRef strQuestionAndAnswer() As String, ByRef finalStr As String)
@@ -989,12 +986,7 @@ Function changeToCmdJD(ByRef strQuestionAndAnswer() As String, ByRef finalStr As
     Set re = New RegExp
     re.Global = True
     '下标可能越界
-    If firstQuestionFlag = True Then
         finalStr = finalStr + strQuestionAndAnswer(0) + Chr(13) + "\begin{myitemize}" + Chr(13)
-        firstQuestionFlag = False
-    Else
-        finalStr = finalStr + Chr(13) + "\end{myitemize}" + strQuestionAndAnswer(0) + Chr(13) + "\begin{myitemize}" + Chr(13)
-    End If
 
     For i = 1 To UBound(strQuestionAndAnswer)
         str = strQuestionAndAnswer(i)
@@ -1026,6 +1018,7 @@ Function changeToCmdJD(ByRef strQuestionAndAnswer() As String, ByRef finalStr As
         End If
         DoEvents
     Next
+    finalStr = finalStr + Chr(13) + "\end{myitemize}" + Chr(13)
 End Function
 
 Function questionList(ByRef strQuestion As String)
