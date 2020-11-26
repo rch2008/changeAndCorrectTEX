@@ -743,7 +743,7 @@ Function cutXTJ(ByRef doc As String, ByRef finalStr As String, ByVal texFileName
     End If
     re.Pattern = "(\n|\r|" + Chr(13) + ")"
     strTestName = re.Replace(strTestName, "")
-    finalStr = "\section{" + strTestName + "}" + finalStr + Chr(13) + "\end{myitemize}"
+    finalStr = "\section{" + strTestName + "}" + finalStr ' + Chr(13) + "\end{myitemize}"
     If readReplaceList = True Then
         replaceList finalStr
     End If
